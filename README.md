@@ -1,66 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TripGenie
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Project Overview
+**TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalized recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customizable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
 
-## About Laravel
+This project is a learning endeavor aimed at extending knowledge in web development, AI integration, and web scraping techniques. It builds on foundational materials from a Computer Science course while introducing new challenges, such as real-time data handling, external API management, and responsive design.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### **Must-Have Features**
+1. **AI-Generated Itineraries**  
+   - Utilizes ChatGPT 3.5 to create personalized travel itineraries based on user preferences (destination, budget, and duration).  
+   - Recommends activities, attractions, restaurants, and hotels tailored to user interests.
 
-## Learning Laravel
+2. **Trip.com API Integration**  
+   - Provides hotel and flight booking capabilities directly through the platform.  
+   - Displays real-time availability and pricing for bookings.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. **Web Scraping**  
+   - Scrapes real-time weather data from reliable sources (e.g., OpenWeatherMap.org).  
+   - Gathers reviews and recommendations from community-generated content (e.g., TripAdvisor, Reddit travel forums).  
+   - Includes a currency conversion tool to display costs in the user's local currency.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. **User Profile Management**  
+   - Allows users to create profiles to save preferences, past itineraries, and booking details.  
+   - Supports preference updates for improved itinerary personalization over time.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### **Should-Have Features**
+1. **Customizable Itinerary Interface**  
+   - Users can modify AI-generated itineraries by adding or removing activities, adjusting schedules, or selecting alternate attractions.  
+   - Provides real-time suggestions to align new recommendations with user interests.
 
-## Laravel Sponsors
+2. **Advanced Filtering Options**  
+   - Users can filter recommendations based on travel style (e.g., adventure, history, family-friendly), price range, or specific interests.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### **Could-Have Features**
+1. **Local Transportation Suggestions**  
+   - Generates transportation options such as bus routes, train schedules, or car rental services.  
+   - Includes eco-friendly transport suggestions to appeal to environmentally conscious users.
 
-### Premium Partners
+2. **AI-Based Travel Tips Chat**  
+   - Allows users to ask location-specific questions and receive AI-generated tips or recommendations.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### **Won't-Have Features**
+1. **Offline Itinerary Generation**  
+   - The platform requires an active internet connection to deliver real-time data and recommendations.
+
+2. **Payment Processing for Bookings**  
+   - Users will be redirected to the Trip.com website for payments to ensure security and compliance with industry standards.
+
+---
+
+## Technologies Used
+- **Frontend**: Responsive web design for a seamless user experience.
+- **Backend**: Laravel framework for secure and efficient server-side programming.
+- **AI Integration**: ChatGPT 3.5 for personalized itinerary generation.
+- **APIs**: Trip.com API for hotel and flight bookings.
+- **Web Scraping**: Playwright and Puppeteer (Node.js) to scrape dynamic web content.
+- **External Sources**: OpenWeatherMap.org for weather data and TripAdvisor/Reddit for community reviews.
+
+---
+
+## Success Criteria
+The success of **TripGenie** will be measured by:
+1. The quality and accuracy of AI-generated itineraries.
+2. Seamless integration and reliability of the Trip.com API.
+3. Effective web scraping techniques for real-time weather updates, currency conversion, and community reviews.
+4. A responsive and user-friendly front-end design.
+5. Clean, maintainable, and robust code.
+6. Positive user feedback from colleagues regarding the platform's functionality and customizability.
+
+---
+
+## Legal and Ethical Considerations
+- Ensures compliance with web scraping and data privacy laws.
+- Adheres to ethical practices by using reliable sources and providing credit where applicable.
+
+---
+
+## Installation and Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/tripgenie.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd tripgenie
+   ```
+3. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
+4. Set up the environment variables:
+   - Create a `.env` file and configure the required API keys (e.g., ChatGPT API, Trip.com API, OpenWeatherMap API).
+5. Run migrations:
+   ```bash
+   php artisan migrate
+   ```
+6. Start the development server:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+---
+
+## Usage
+1. Create an account or log in to access personalized travel planning features.
+2. Input your travel preferences (destination, budget, duration, etc.).
+3. View and customize your AI-generated itinerary.
+4. Explore flight and hotel options via the Trip.com integration.
+5. Check real-time weather updates and currency conversions for your destination.
+6. Save itineraries to your profile for future reference.
+
+---
+
+## Future Enhancements
+- Add local transportation suggestions for eco-friendly options.
+- Develop an AI-based travel tips chat feature.
+- Expand API integrations to include more travel booking services.
+
+---
 
 ## Contributing
+Contributions are welcome! Please open an issue or submit a pull request to suggest improvements or report bugs.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
 ## License
+This project is licensed under the [MIT License](LICENSE).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Acknowledgments
+- [OpenAI](https://openai.com) for ChatGPT 3.5
+- [Trip.com](https://www.trip.com) for their API
+- [OpenWeatherMap](https://openweathermap.org) for weather data
+- [Node.js](https://nodejs.org) for Playwright and Puppeteer
+
+---
+
+Happy traveling with **TripGenie**! 🌍✈️
