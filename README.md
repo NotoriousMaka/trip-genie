@@ -1,54 +1,9 @@
 # TripGenie
 
 ## Project Overview
-**TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalized recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customizable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
+**TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalised recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customisable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
 
 This project is a learning endeavor aimed at extending knowledge in web development, AI integration, and web scraping techniques. It builds on foundational materials from a Computer Science course while introducing new challenges, such as real-time data handling, external API management, and responsive design.
-
----
-
-## Features
-
-### **Must-Have Features**
-1. **AI-Generated Itineraries**  
-   - Utilizes ChatGPT 3.5 to create personalized travel itineraries based on user preferences (destination, budget, and duration).  
-   - Recommends activities, attractions, restaurants, and hotels tailored to user interests.
-
-2. **Trip.com API Integration**  
-   - Provides hotel and flight booking capabilities directly through the platform.  
-   - Displays real-time availability and pricing for bookings.
-
-3. **Web Scraping**  
-   - Scrapes real-time weather data from reliable sources (e.g., OpenWeatherMap.org).  
-   - Gathers reviews and recommendations from community-generated content (e.g., TripAdvisor, Reddit travel forums).  
-   - Includes a currency conversion tool to display costs in the user's local currency.
-
-4. **User Profile Management**  
-   - Allows users to create profiles to save preferences, past itineraries, and booking details.  
-   - Supports preference updates for improved itinerary personalization over time.
-
-### **Should-Have Features**
-1. **Customizable Itinerary Interface**  
-   - Users can modify AI-generated itineraries by adding or removing activities, adjusting schedules, or selecting alternate attractions.  
-   - Provides real-time suggestions to align new recommendations with user interests.
-
-2. **Advanced Filtering Options**  
-   - Users can filter recommendations based on travel style (e.g., adventure, history, family-friendly), price range, or specific interests.
-
-### **Could-Have Features**
-1. **Local Transportation Suggestions**  
-   - Generates transportation options such as bus routes, train schedules, or car rental services.  
-   - Includes eco-friendly transport suggestions to appeal to environmentally conscious users.
-
-2. **AI-Based Travel Tips Chat**  
-   - Allows users to ask location-specific questions and receive AI-generated tips or recommendations.
-
-### **Won't-Have Features**
-1. **Offline Itinerary Generation**  
-   - The platform requires an active internet connection to deliver real-time data and recommendations.
-
-2. **Payment Processing for Bookings**  
-   - Users will be redirected to the Trip.com website for payments to ensure security and compliance with industry standards.
 
 ---
 
