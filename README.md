@@ -1,4 +1,4 @@
-![](public/logos/logo-transparent.png)
+![](public/logos/logo-transparent-white.png)
 
 ## Project Overview
 **TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalised recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customisable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
