@@ -88,7 +88,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
 - [OpenAI](https://openai.com) for ChatGPT 3.5
-- [OpenWeatherMap](https://openweathermap.org) for weather data
 - [Node.js](https://nodejs.org) for Playwright and Puppeteer
 
 ---
