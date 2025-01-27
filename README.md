@@ -1,4 +1,4 @@
-# TripGenie
+![](public/logos/logo-transparent.png)
 
 ## Project Overview
 **TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalised recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customisable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
@@ -10,8 +10,7 @@ This project is a learning endeavor aimed at extending knowledge in web developm
 ## Technologies Used
 - **Frontend**: Responsive web design for a seamless user experience.
 - **Backend**: Laravel framework for secure and efficient server-side programming.
-- **AI Integration**: ChatGPT 3.5 for personalized itinerary generation.
-- **APIs**: Trip.com API for hotel and flight bookings.
+- **AI Integration**: ChatGPT 3.5 for personalised itinerary generation.
 - **Web Scraping**: Playwright and Puppeteer (Node.js) to scrape dynamic web content.
 - **External Sources**: OpenWeatherMap.org for weather data and TripAdvisor/Reddit for community reviews.
 
@@ -20,11 +19,10 @@ This project is a learning endeavor aimed at extending knowledge in web developm
 ## Success Criteria
 The success of **TripGenie** will be measured by:
 1. The quality and accuracy of AI-generated itineraries.
-2. Seamless integration and reliability of the Trip.com API.
-3. Effective web scraping techniques for real-time weather updates, currency conversion, and community reviews.
-4. A responsive and user-friendly front-end design.
-5. Clean, maintainable, and robust code.
-6. Positive user feedback from colleagues regarding the platform's functionality and customizability.
+2. Effective web scraping techniques for real-time weather updates, currency conversion, and community reviews.
+3. A responsive and user-friendly front-end design.
+4. Clean, maintainable, and robust code.
+5. Positive user feedback from colleagues regarding the platform's functionality and customisability.
 
 ---
 
@@ -63,19 +61,18 @@ The success of **TripGenie** will be measured by:
 ---
 
 ## Usage
-1. Create an account or log in to access personalized travel planning features.
+1. Create an account or log in to access personalised travel planning features.
 2. Input your travel preferences (destination, budget, duration, etc.).
-3. View and customize your AI-generated itinerary.
-4. Explore flight and hotel options via the Trip.com integration.
-5. Check real-time weather updates and currency conversions for your destination.
-6. Save itineraries to your profile for future reference.
+3. View and customise your AI-generated itinerary.
+4. Check real-time weather updates and currency conversions for your destination.
+5. Save itineraries to your profile for future reference.
 
 ---
 
 ## Future Enhancements
 - Add local transportation suggestions for eco-friendly options.
+- Integrate a booking API for hotels, flights and others.
 - Develop an AI-based travel tips chat feature.
-- Expand API integrations to include more travel booking services.
 
 ---
 
@@ -91,7 +88,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
 - [OpenAI](https://openai.com) for ChatGPT 3.5
-- [Trip.com](https://www.trip.com) for their API
 - [OpenWeatherMap](https://openweathermap.org) for weather data
 - [Node.js](https://nodejs.org) for Playwright and Puppeteer
 
