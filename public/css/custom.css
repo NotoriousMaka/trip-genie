@@ -1,5 +1,18 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
 .form_container {
-    width: fit-content;
+    width: 80%; /* Adjust this value as needed */
+    max-width: 200px; /* Set a maximum width */
     height: fit-content;
     display: flex;
     flex-direction: column;
@@ -9,12 +22,6 @@
     background-color: #ffffff;
     border-radius: 11px;
     font-family: "Inter", sans-serif;
-}
-
-html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
 }
 
 .logo_container {
@@ -163,7 +170,6 @@ html, body {
     font-size: 0.75rem;
     color: #8B8E98;
     font-weight: 600;
-    text-decoration: underline;
     cursor: pointer;
     text-decoration: none;
 }

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card p-4">
+        <div class="card p-4" style="max-width: 400px; width: 100%;">
             <div class="title_container text-center mb-4">
                 <h3 class="title">Login to Your Account</h3>
             </div>
