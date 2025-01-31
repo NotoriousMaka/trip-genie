@@ -25,6 +25,17 @@
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
         }
     </style>
+    <script>
+        function validateForm() {
+            const location = document.getElementById('location').value;
+            const date = document.getElementById('date').value;
+            if (!location || !date) {
+                alert('Please fill in all fields before exploring.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 <body class="text-gray-800" style="background-image: url('{{ asset('images/mountains.jpg') }}'); background-size: cover; background-position: center;">
 <header class="bg-transparent text-white py-6 transparent-bg">
@@ -41,7 +52,7 @@
 
 <main>
     <section id="about" class="bg-white bg-opacity-80 py-20 transparent-bg">
-        <div class="container mx-auto px-4 text-center bg-white shadow-lg rounded-lg p-8 max-w-5xl mx-auto">
+        <div class="container px-4 text-center bg-white shadow-lg rounded-lg p-8 max-w-5xl mx-auto">
             <h2 class="text-5xl font-extrabold mb-6">Your Gateway to Amazing Adventures</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                 Discover the world with TripGenie, your trusted AI travel companion.<br>
@@ -60,12 +71,16 @@
                         <input type="text" id="location" name="location" placeholder="Enter destination" class="w-full border border-gray-300 rounded-lg p-3">
                     </div>
                     <div>
-                        <label for="date" class="block text-gray-700 font-medium mb-2">Date</label>
-                        <input type="date" id="date" name="date" class="w-full border border-gray-300 rounded-lg p-3">
+                        <label for="start-date" class="block text-gray-700 font-medium mb-2">Start Date</label>
+                        <input type="date" id="start-date" name="start-date" class="w-full border border-gray-300 rounded-lg p-3">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Explore Now</button>
+                    <div>
+                        <label for="end-date" class="block text-gray-700 font-medium mb-2">End Date</label>
+                        <input type="date" id="end-date" name="end-date" class="w-full border border-gray-300 rounded-lg p-3">
                     </div>
+                </div>
+                <div class="flex justify-center">
+                    <button type="submit" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700" onclick="return validateForm()">Explore Now</button>
                 </div>
             </form>
         </div>
