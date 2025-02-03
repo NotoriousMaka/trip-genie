@@ -67,11 +67,17 @@
         <div class="container mx-auto px-4 text-center">
             <form class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
                 <h3 class="text-4xl font-bold mb-6">Plan Your Next Trip</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label for="location" class="block text-gray-700 font-medium mb-2">Location</label>
-                        <input type="text" id="location" name="location" placeholder="Enter destination" class="w-full border border-gray-300 rounded-lg p-3">
+                        <label for="city" class="block text-gray-700 font-medium mb-2">City</label>
+                        <input type="text" id="city" name="city" placeholder="Enter city" class="w-full border border-gray-300 rounded-lg p-3">
                     </div>
+                    <div>
+                        <label for="country" class="block text-gray-700 font-medium mb-2">Country</label>
+                        <input type="text" id="country" name="country" placeholder="Enter country" class="w-full border border-gray-300 rounded-lg p-3">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label for="start-date" class="block text-gray-700 font-medium mb-2">Start Date</label>
                         <input type="date" id="start-date" name="start-date" class="w-full border border-gray-300 rounded-lg p-3">
