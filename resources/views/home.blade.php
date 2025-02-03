@@ -45,6 +45,7 @@
             <ul class="flex space-x-4">
                 <li><a href="#about" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">About Us</a></li>
                 <li><a href="#destinations" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Destinations</a></li>
+                <li><a href="{{ route('dashboard') }}" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Profile</a></li>
             </ul>
         </nav>
     </div>
