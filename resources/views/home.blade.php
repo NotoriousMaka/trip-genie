@@ -65,34 +65,42 @@
 
     <section id="search-form" class="bg-gray-100 bg-opacity-0 py-20">
         <div class="container mx-auto px-4 text-center">
-            <form class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
-                <h3 class="text-4xl font-bold mb-6">Plan Your Next Trip</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label for="city" class="block text-gray-700 font-medium mb-2">City</label>
-                        <input type="text" id="city" name="city" placeholder="Enter city" class="w-full border border-gray-300 rounded-lg p-3">
+            @if(Auth::check())
+                <form action="{{ url('/trip/store') }}" method="POST" class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
+                    @csrf
+                    <h3 class="text-4xl font-bold mb-6">Plan Your Next Trip</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="city" class="block text-gray-700 font-medium mb-2">City</label>
+                            <input type="text" id="city" name="city" placeholder="Enter city" class="w-full border border-gray-300 rounded-lg p-3" required>
+                        </div>
+                        <div>
+                            <label for="country" class="block text-gray-700 font-medium mb-2">Country</label>
+                            <input type="text" id="country" name="country" placeholder="Enter country" class="w-full border border-gray-300 rounded-lg p-3" required>
+                        </div>
                     </div>
-                    <div>
-                        <label for="country" class="block text-gray-700 font-medium mb-2">Country</label>
-                        <input type="text" id="country" name="country" placeholder="Enter country" class="w-full border border-gray-300 rounded-lg p-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="start-date" class="block text-gray-700 font-medium mb-2">Start Date</label>
+                            <input type="date" id="start-date" name="start_date" class="w-full border border-gray-300 rounded-lg p-3" required>
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-gray-700 font-medium mb-2">End Date</label>
+                            <input type="date" id="end-date" name="end_date" class="w-full border border-gray-300 rounded-lg p-3" required>
+                        </div>
                     </div>
+                    <div class="flex justify-center">
+                        <button type="submit" class="explore-now-btn bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Explore Now</button>
+                    </div>
+                </form>
+            @else
+                <div class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto text-center">
+                    <p class="text-lg text-gray-600">Please <a href="{{ url('/login') }}" class="text-blue-600 hover:underline">login</a> or <a href="{{ url('/register') }}" class="text-blue-600 hover:underline">register</a> to submit a trip.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label for="start-date" class="block text-gray-700 font-medium mb-2">Start Date</label>
-                        <input type="date" id="start-date" name="start-date" class="w-full border border-gray-300 rounded-lg p-3">
-                    </div>
-                    <div>
-                        <label for="end-date" class="block text-gray-700 font-medium mb-2">End Date</label>
-                        <input type="date" id="end-date" name="end-date" class="w-full border border-gray-300 rounded-lg p-3">
-                    </div>
-                </div>
-                <div class="flex justify-center">
-                    <button type="submit" class="explore-now-btn bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700" onclick="return validateForm()">Explore Now</button>
-                </div>
-            </form>
+            @endif
         </div>
     </section>
+
 
     <section id="destinations" class="py-20">
         <div class="container mx-auto px-4">
@@ -150,175 +158,5 @@
         </div>
     </div>
 </footer>
-
-<!-- Registration Modal -->
-<div id="registrationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-8 rounded-lg shadow-lg relative max-w-2xl w-full">
-        <div class="title_container text-center mb-4">
-            <h3 class="title text-2xl font-bold">Register Your Account</h3>
-            <button id="closeRegistrationModal" class="absolute top-0 right-0 mt-2 mr-2 text-gray-500 hover:text-gray-700 text-2xl">
-                &times;
-            </button>
-        </div>
-        <form id="registrationForm" method="POST" action="{{ route('register') }}">
-            @csrf
-
-            <div class="mb-4 input_container">
-                <label for="name" class="input_label block text-gray-700 font-medium mb-2">Name</label>
-                <div class="input-group">
-                    <input id="name" type="text"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('name') is-invalid @enderror"
-                           name="name" value="{{ old('name') }}" required autocomplete="name" placeholder="John Doe">
-                    @error('name')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-4 input_container">
-                <label for="email" class="input_label block text-gray-700 font-medium mb-2">Email Address</label>
-                <div class="input-group">
-                    <input id="email" type="email"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('email') is-invalid @enderror"
-                           name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="name@mail.com">
-                    @error('email')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-4 input_container">
-                <label for="password" class="input_label block text-gray-700 font-medium mb-2">Password</label>
-                <div class="input-group">
-                    <input id="password" type="password"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('password') is-invalid @enderror"
-                           name="password" required autocomplete="new-password" placeholder="********">
-                    @error('password')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-4 input_container">
-                <label for="password_confirmation" class="input_label block text-gray-700 font-medium mb-2">Confirm Password</label>
-                <div class="input-group">
-                    <input id="password_confirmation" type="password"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('password_confirmation') is-invalid @enderror"
-                           name="password_confirmation" required autocomplete="new-password" placeholder="********">
-                    @error('password_confirmation')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary sign-in_btn w-full bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Register</button>
-            </div>
-
-            <div class="text-center mt-4">
-                <button type="button" class="btn btn-light sign-in_ggl w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200">
-                    <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2">
-                    Sign up with Google
-                </button>
-            </div>
-
-            <div class="text-center mt-4">
-                <p>Already have an account? <a href="#" id="showLoginModal" class="text-blue-600 hover:underline">Sign in</a></p>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Login Modal -->
-<div id="loginModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-8 rounded-lg shadow-lg relative max-w-2xl w-full">
-        <div class="title_container text-center mb-4">
-            <h3 class="title text-2xl font-bold">Sign In to Your Account</h3>
-            <button id="closeLoginModal" class="absolute top-0 right-0 mt-2 mr-2 text-gray-500 hover:text-gray-700 text-2xl">
-                &times;
-            </button>
-        </div>
-        <form id="loginForm" method="POST" action="{{ route('login') }}">
-            @csrf
-
-            <div class="mb-4 input_container">
-                <label for="email" class="input_label block text-gray-700 font-medium mb-2">Email Address</label>
-                <div class="input-group">
-                    <input id="email" type="email"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('email') is-invalid @enderror"
-                           name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="name@mail.com">
-                    @error('email')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mb-4 input_container">
-                <label for="password" class="input_label block text-gray-700 font-medium mb-2">Password</label>
-                <div class="input-group">
-                    <input id="password" type="password"
-                           class="form-control input_field w-full border border-gray-300 rounded-lg p-3 @error('password') is-invalid @enderror"
-                           name="password" required autocomplete="current-password" placeholder="********">
-                    @error('password')
-                    <div class="invalid-feedback text-red-500 mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary sign-in_btn w-full bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Sign In</button>
-            </div>
-
-            <div class="text-center mt-4">
-                <button type="button" class="btn btn-light sign-in_ggl w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200">
-                    <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2">
-                    Sign in with Google
-                </button>
-            </div>
-
-            <div class="text-center mt-4">
-                <p>Don't have an account? <a href="#" id="showRegistrationModal" class="text-blue-600 hover:underline">Register</a></p>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const exploreNowButton = document.querySelector('.explore-now-btn');
-        const registrationModal = document.getElementById('registrationModal');
-        const loginModal = document.getElementById('loginModal');
-        const closeRegistrationModal = document.getElementById('closeRegistrationModal');
-        const closeLoginModal = document.getElementById('closeLoginModal');
-        const showLoginModal = document.getElementById('showLoginModal');
-        const showRegistrationModal = document.getElementById('showRegistrationModal');
-
-        exploreNowButton.addEventListener('click', function (event) {
-            event.preventDefault();
-            registrationModal.classList.remove('hidden');
-        });
-
-        closeRegistrationModal.addEventListener('click', function () {
-            registrationModal.classList.add('hidden');
-        });
-
-        closeLoginModal.addEventListener('click', function () {
-            loginModal.classList.add('hidden');
-        });
-
-        showLoginModal.addEventListener('click', function (event) {
-            event.preventDefault();
-            registrationModal.classList.add('hidden');
-            loginModal.classList.remove('hidden');
-        });
-
-        showRegistrationModal.addEventListener('click', function (event) {
-            event.preventDefault();
-            loginModal.classList.add('hidden');
-            registrationModal.classList.remove('hidden');
-        });
-    });
-</script>
-
 </body>
 </html>

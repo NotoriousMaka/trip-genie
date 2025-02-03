@@ -3,10 +3,14 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TripController;
 
 Route::get('/', function () {
     return view('home');
 });
+
+Route::post('/trip/store', [TripController::class, 'store'])->middleware('auth');
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
