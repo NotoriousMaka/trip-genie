@@ -34,5 +34,16 @@ class TripController extends Controller
 
         return redirect()->back()->with('success', 'Trip added successfully!');
     }
+
+    public function index()
+    {
+        if (!Auth::check()) {
+            return redirect('/login')->with('error', 'You must be logged in to view your trips.');
+        }
+
+        $trips = Trip::where('user_id', Auth::id())->get();
+
+        return view('trips', compact('trips'));
+    }
 }
 

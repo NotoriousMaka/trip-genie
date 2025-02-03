@@ -68,6 +68,7 @@
                     @csrf
                     <button type="submit" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Logout</button>
                 </form>
+                <a href="{{ route('my-trips') }}" class="text-blue-600 hover:text-blue-800">My Trips</a>
             </div>
         </div>
     </section>
