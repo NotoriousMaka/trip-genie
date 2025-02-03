@@ -43,6 +43,7 @@
         <img src="{{ asset('logos/logo-transparent-white.png') }}" alt="{{ config('app.name', 'Laravel') }}" class="h-16 w-auto">
         <nav>
             <ul class="flex space-x-4">
+                <li><a href="/" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Home</a></li>
                 <li><a href="#about" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">About Us</a></li>
                 <li><a href="#destinations" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Destinations</a></li>
                 <li><a href="{{ route('dashboard') }}" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Profile</a></li>

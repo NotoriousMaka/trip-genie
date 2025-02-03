@@ -32,6 +32,7 @@
         <img src="{{ asset('logos/logo-transparent-white.png') }}" alt="{{ config('app.name', 'Laravel') }}" class="h-16 w-auto">
         <nav>
             <ul class="flex space-x-4">
+                <li><a href="/" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Home</a></li>
                 <li><a href="#profile" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Profile</a></li>
                 <li><a href="#settings" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Settings</a></li>
             </ul>
@@ -59,9 +60,9 @@
         </div>
     </section>
 
-    <section id="settings" class="py-20">
+    <section id="settings" class="py-20 flex justify-center items-center">
         <div class="container mx-auto px-4">
-            <div class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
+            <div class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto text-center">
                 <h3 class="text-4xl font-bold mb-6">Settings</h3>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
