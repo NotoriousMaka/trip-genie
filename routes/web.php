@@ -9,7 +9,7 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::post('/trip/store', [TripController::class, 'store'])->middleware('auth');
+Route::post('/trip/store', [TripController::class, 'store'])->name('trip.store');
 
 Route::get('/my-trips', [TripController::class, 'index'])->middleware('auth')->name('my-trips');
 

@@ -66,7 +66,7 @@
     <section id="search-form" class="bg-gray-100 bg-opacity-0 py-20">
         <div class="container mx-auto px-4 text-center">
             @if(Auth::check())
-                <form action="{{ url('/trip/store') }}" method="POST" class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
+                <form action="{{ route('trip.store') }}" method="POST" class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
                     @csrf
                     <h3 class="text-4xl font-bold mb-6">Plan Your Next Trip</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
