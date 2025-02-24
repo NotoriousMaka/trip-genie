@@ -57,10 +57,10 @@ class TripController extends Controller
         $response = $client->chat()->create([
             'model' => 'gpt-3.5-turbo',
             'messages' => [
-                ['role' => 'system', 'content' => 'You are a travel assistant.'],
+                ['role' => 'system', 'content' => 'You are a travel assistant. You need to provide detailed information about locations and travel plans. Also, provide travel tips for the location and take into consideration time, weather and any other relevant information.'],
                 ['role' => 'user', 'content' => "Create a travel plan for a trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
             ],
-            'max_tokens' => 150,
+            'max_tokens' => 700,
         ]);
 
         // Safely access the content
