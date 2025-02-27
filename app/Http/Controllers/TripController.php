@@ -15,11 +15,11 @@ class TripController extends Controller
             'country' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'preference' => 'string|in:adventure,relaxation,culture,nature,food',
         ]);
 
-        // Run the scraper.js script
-        $scriptPath = 'D:\University\travel-planner\scrapers\scraper.js';
-        $command = "cd D:\\University\\travel-planner && node scrapers\\scraper.js";
+        $scriptPath = base_path('scrapers/scraper.js');
+        $command = "cd " . base_path() . " && node scrapers/scraper.js";
         exec($command, $output, $return_var);
 
         if ($return_var !== 0) {
@@ -30,6 +30,7 @@ class TripController extends Controller
         $country = $request->input('country');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $preference = $request->input('preference', 'adventure');
 
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
@@ -38,16 +39,13 @@ class TripController extends Controller
 
         $client = OpenAI::client($apiKey);
 
-        // Check if the selected_cards.json file exists
-        $filePath = 'D:\University\travel-planner\scrapers\selected_cards.json';
+        $filePath = base_path('scrapers/selected_cards.json');
         if (!File::exists($filePath)) {
             return response()->json(['error' => 'Selected cards file does not exist'], 500);
         }
 
-        // Read the selected cards from the JSON file
         $selectedCards = json_decode(File::get($filePath), true);
 
-        // Format the selected cards into a string
         $cardsContent = '';
         foreach ($selectedCards as $card) {
             $cardsContent .= "Name: {$card['name']}\nDescription: {$card['description']}\n\n";
@@ -58,39 +56,34 @@ class TripController extends Controller
             'model' => 'gpt-3.5-turbo',
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a travel assistant. You need to provide detailed information about locations and travel plans. Also, provide travel tips for the location and take into consideration time, weather and any other relevant information.'],
-                ['role' => 'user', 'content' => "Create a travel plan for a trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
+                ['role' => 'user', 'content' => "Create a travel plan for a $preference trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
             ],
             'max_tokens' => 700,
         ]);
 
-        // Safely access the content
         $travelPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated.';
 
-        return view('trip.plan', compact('travelPlan'));
+        $locations = $selectedCards;
+
+        return view('trip.plan', compact('travelPlan', 'locations', 'city', 'country', 'startDate', 'endDate', 'preference'));
     }
 
     public function showTripPlan()
     {
-        // Path to the JSON file
-        $jsonFilePath = 'D:\University\travel-planner\scrapers\selected_cards.json';
+        $filePath = base_path('scrapers/selected_cards.json');
 
-        // Check if the file exists
-        if (!File::exists($jsonFilePath)) {
+        if (!File::exists($filePath)) {
             return response()->json(['error' => 'Selected cards file does not exist'], 500);
         }
 
-        // Read the JSON file
-        $jsonData = file_get_contents($jsonFilePath);
+        $jsonData = file_get_contents($filePath);
 
-        // Decode the JSON data
         $locations = json_decode($jsonData, true);
 
-        // Check if decoding failed or the result is not an array
         if (!is_array($locations)) {
-            $locations = [];  // Default to an empty array
+            $locations = [];
         }
 
-        // Pass the locations data to the view
         return view('trip.plan', compact('locations'));
     }
 }

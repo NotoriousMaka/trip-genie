@@ -112,7 +112,7 @@
     </section>
 
     <section id="create-plan" class="bg-black py-20">
-        <div class="container mx-auto px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
+        <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Create Your Travel Plan</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
                 Discover the world with TripGenie, your trusted AI travel companion.
@@ -134,16 +134,16 @@
                         </div>
                     </div>
 
-                    <!-- Start Date and End Date Inputs (Aligned Horizontally) -->
+                    <!-- Make sure these match exactly what your controller expects -->
                     <div class="flex space-x-6">
                         <div class="w-1/2">
-                            <label for="start-date" class="block text-gray-600 font-medium mb-2">Start Date</label>
-                            <input type="date" id="start-date" name="start-date" class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-600">
+                            <label for="start_date" class="block text-gray-600 font-medium mb-2">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-600">
                         </div>
 
                         <div class="w-1/2">
-                            <label for="end-date" class="block text-gray-600 font-medium mb-2">End Date</label>
-                            <input type="date" id="end-date" name="end-date" class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-600">
+                            <label for="end_date" class="block text-gray-600 font-medium mb-2">End Date</label>
+                            <input type="date" id="end_date" name="end_date" class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-600">
                         </div>
                     </div>
 
