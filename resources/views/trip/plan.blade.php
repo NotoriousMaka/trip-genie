@@ -15,7 +15,6 @@
             min-height: 100vh;
         }
         main {
-            flex: 1;
         }
         .transparent-bg {
             background-color: transparent !important;
@@ -25,7 +24,72 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
         }
+
+        .map-container {
+            height: 500px;
+            width: 100%;
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .itinerary {
+            width: 50%;
+            padding-right: 20px;
+        }
+
+        .map {
+            width: 50%;
+        }
     </style>
+    <script>
+        async function init() {
+            await customElements.whenDefined('gmp-map');
+
+            const map = document.querySelector('gmp-map');
+            const marker = document.querySelector('gmp-advanced-marker');
+            const placePicker = document.querySelector('gmpx-place-picker');
+            const infowindow = new google.maps.InfoWindow();
+
+            map.innerMap.setOptions({
+                mapTypeControl: false
+            });
+
+            placePicker.addEventListener('gmpx-placechange', () => {
+                const place = placePicker.value;
+
+                if (!place.location) {
+                    window.alert(
+                        "No details available for input: '" + place.name + "'"
+                    );
+                    infowindow.close();
+                    marker.position = null;
+                    return;
+                }
+
+                if (place.viewport) {
+                    map.innerMap.fitBounds(place.viewport);
+                } else {
+                    map.center = place.location;
+                    map.zoom = 17;
+                }
+
+                marker.position = place.location;
+                infowindow.setContent(
+                    `<strong>${place.displayName}</strong><br>
+             <span>${place.formattedAddress}</span>
+          `);
+                infowindow.open(map.innerMap, marker);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js">
+    </script>
 </head>
 <body class="text-gray-800" style="background-image: url('{{ asset('images/mountains.jpg') }}'); background-size: cover; background-position: center;">
 <header class="bg-transparent text-white py-6 transparent-bg">
@@ -53,12 +117,56 @@
     </section>
 
     <section id="trip-plan" class="py-20 bg-white bg-opacity-80">
-        <div class="container mx-auto px-4">
-            <div class="bg-white shadow-lg rounded-lg p-8 max-w-2xl mx-auto">
+        <div class="container mx-auto px-4 content-container">
+            <div class="bg-white shadow-lg rounded-lg p-8 itinerary">
                 <h3 class="text-3xl font-bold mb-4">Your Customized Itinerary</h3>
                 <div class="text-lg text-gray-600">
                     {!! nl2br(e($travelPlan)) !!}
                 </div>
+            </div>
+            <div class="map-container map">
+                <gmpx-api-loader key="AIzaSyC_1zS_ANm4Zo7v8Drsv9bQqurLEZUGtvA" solution-channel="GMP_GE_mapsandplacesautocomplete_v2">
+                </gmpx-api-loader>
+                <gmp-map center="48.8566, 2.3522" zoom="12" map-id="DEMO_MAP_ID">
+                    @if(is_array($locations) && count($locations) > 0)
+                        @foreach($locations as $location)
+                            <script>
+                                const locationName = "{{ $location['name'] }}"; // Location name from JSON
+
+                                // Use Google Maps Geocoding API to get the coordinates for each location by name
+                                const geocoder = new google.maps.Geocoder();
+
+                                geocoder.geocode({ 'address': locationName }, function(results, status) {
+                                    if (status === 'OK') {
+                                        const location = results[0].geometry.location;
+                                        const lat = location.lat();
+                                        const lng = location.lng();
+
+                                        // Add a marker to the map at the location's coordinates
+                                        const marker = new google.maps.Marker({
+                                            position: { lat, lng },
+                                            map: document.querySelector('gmp-map').innerMap,
+                                            title: locationName
+                                        });
+
+                                        // Add an info window for the marker
+                                        const infowindow = new google.maps.InfoWindow({
+                                            content: `<strong>${locationName}</strong><br>${results[0].formatted_address}`
+                                        });
+
+                                        marker.addListener('click', function() {
+                                            infowindow.open(document.querySelector('gmp-map').innerMap, marker);
+                                        });
+                                    } else {
+                                        console.log("Geocode was not successful for the following reason: " + status);
+                                    }
+                                });
+                            </script>
+                        @endforeach
+                    @else
+                        <p>No locations found for your trip.</p>
+                    @endif
+                </gmp-map>
             </div>
         </div>
     </section>

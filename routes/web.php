@@ -11,6 +11,8 @@ Route::get('/', function () {
 
 Route::post('/trip/store', [TripController::class, 'store'])->name('trip.store');
 
+Route::get('/trip-plan', [TripController::class, 'showTripPlan']);
+
 Route::get('/my-trips', [TripController::class, 'index'])->middleware('auth')->name('my-trips');
 
 

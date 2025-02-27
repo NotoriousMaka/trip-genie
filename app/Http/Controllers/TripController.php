@@ -68,4 +68,29 @@ class TripController extends Controller
 
         return view('trip.plan', compact('travelPlan'));
     }
+
+    public function showTripPlan()
+    {
+        // Path to the JSON file
+        $jsonFilePath = 'D:\University\travel-planner\scrapers\selected_cards.json';
+
+        // Check if the file exists
+        if (!File::exists($jsonFilePath)) {
+            return response()->json(['error' => 'Selected cards file does not exist'], 500);
+        }
+
+        // Read the JSON file
+        $jsonData = file_get_contents($jsonFilePath);
+
+        // Decode the JSON data
+        $locations = json_decode($jsonData, true);
+
+        // Check if decoding failed or the result is not an array
+        if (!is_array($locations)) {
+            $locations = [];  // Default to an empty array
+        }
+
+        // Pass the locations data to the view
+        return view('trip.plan', compact('locations'));
+    }
 }
