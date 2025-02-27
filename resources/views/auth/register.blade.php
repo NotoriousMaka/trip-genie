@@ -54,6 +54,28 @@
             color: #fff;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('registerForm');
+            form.addEventListener('submit', function (event) {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    alert('Please enter a valid email address.');
+                    event.preventDefault();
+                    return;
+                }
+
+                if (password !== passwordConfirmation) {
+                    alert('Passwords do not match.');
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="form-container">
