@@ -11,10 +11,7 @@ Route::get('/', function () {
 
 Route::post('/trip/store', [TripController::class, 'store'])->name('trip.store');
 
-Route::get('/trip-plan', [TripController::class, 'showTripPlan']);
-
-Route::get('/my-trips', [TripController::class, 'index'])->middleware('auth')->name('my-trips');
-
+Route::post('/create-plan', [TripController::class, 'store'])->name('create-plan');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
