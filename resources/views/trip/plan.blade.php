@@ -1,4 +1,3 @@
-<!-- resources/views/trip/plan.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,186 +12,83 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            background-color: #000;
+            color: #fff;
+            justify-content: center;
+            align-items: center;
         }
+
         main {
-        }
-        .transparent-bg {
-            background-color: transparent !important;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .map-container {
-            height: 500px;
+            flex: 1;
             width: 100%;
         }
 
-        .content-container {
+        section {
             display: flex;
-            flex-direction: row;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
 
-        .itinerary {
-            width: 50%;
-            padding-right: 20px;
+        header nav ul li a {
+            background-color: #333;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
 
-        .map {
-            width: 50%;
+        header nav ul li a:hover {
+            background-color: #555;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 500px;
         }
     </style>
-    <script>
-        async function init() {
-            await customElements.whenDefined('gmp-map');
-
-            const map = document.querySelector('gmp-map');
-            const marker = document.querySelector('gmp-advanced-marker');
-            const placePicker = document.querySelector('gmpx-place-picker');
-            const infowindow = new google.maps.InfoWindow();
-
-            map.innerMap.setOptions({
-                mapTypeControl: false
-            });
-
-            placePicker.addEventListener('gmpx-placechange', () => {
-                const place = placePicker.value;
-
-                if (!place.location) {
-                    window.alert(
-                        "No details available for input: '" + place.name + "'"
-                    );
-                    infowindow.close();
-                    marker.position = null;
-                    return;
-                }
-
-                if (place.viewport) {
-                    map.innerMap.fitBounds(place.viewport);
-                } else {
-                    map.center = place.location;
-                    map.zoom = 17;
-                }
-
-                marker.position = place.location;
-                infowindow.setContent(
-                    `<strong>${place.displayName}</strong><br>
-             <span>${place.formattedAddress}</span>
-          `);
-                infowindow.open(map.innerMap, marker);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js">
-    </script>
 </head>
-<body class="text-gray-800" style="background-image: url('{{ asset('images/mountains.jpg') }}'); background-size: cover; background-position: center;">
-<header class="bg-transparent text-white py-6 transparent-bg">
+<body class="text-white">
+
+<header class="bg-transparent text-white py-6">
     <div class="container mx-auto flex justify-between items-center px-4">
         <img src="{{ asset('logos/logo-transparent-white.png') }}" alt="{{ config('app.name', 'Laravel') }}" class="h-16 w-auto">
         <nav>
             <ul class="flex space-x-4">
-                <li><a href="/" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Home</a></li>
-                <li><a href="#about" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">About Us</a></li>
-                <li><a href="#destinations" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Destinations</a></li>
-                <li><a href="{{ route('dashboard') }}" class="bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700">Profile</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                <li><a href="#settings">Settings</a></li>
             </ul>
         </nav>
     </div>
 </header>
 
 <main>
-    <section id="about" class="bg-white bg-opacity-80 py-20 transparent-bg">
-        <div class="container px-4 text-center bg-white shadow-lg rounded-lg p-8 max-w-5xl mx-auto">
+    <section id="trip-plan" class="bg-black py-20">
+        <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Your Travel Plan</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Here is your travel plan, carefully crafted for your next adventure. Enjoy every moment and explore new horizons.
+                Here is your travel plan, carefully crafted for your next adventure.
             </p>
         </div>
     </section>
 
-    <section id="trip-plan" class="py-20 bg-white bg-opacity-80">
-        <div class="container mx-auto px-4 content-container">
-            <div class="bg-white shadow-lg rounded-lg p-8 itinerary">
-                <h3 class="text-3xl font-bold mb-4">Your Customized Itinerary</h3>
-                <div class="text-lg text-gray-600">
-                    {!! nl2br(e($travelPlan)) !!}
-                </div>
-            </div>
-            <div class="map-container map">
-                <gmpx-api-loader key="AIzaSyC_1zS_ANm4Zo7v8Drsv9bQqurLEZUGtvA" solution-channel="GMP_GE_mapsandplacesautocomplete_v2">
-                </gmpx-api-loader>
-                <gmp-map center="48.8566, 2.3522" zoom="12" map-id="DEMO_MAP_ID">
-                    @if(is_array($locations) && count($locations) > 0)
-                        @foreach($locations as $location)
-                            <script>
-                                const locationName = "{{ $location['name'] }}"; // Location name from JSON
-
-                                // Use Google Maps Geocoding API to get the coordinates for each location by name
-                                const geocoder = new google.maps.Geocoder();
-
-                                geocoder.geocode({ 'address': locationName }, function(results, status) {
-                                    if (status === 'OK') {
-                                        const location = results[0].geometry.location;
-                                        const lat = location.lat();
-                                        const lng = location.lng();
-
-                                        // Add a marker to the map at the location's coordinates
-                                        const marker = new google.maps.Marker({
-                                            position: { lat, lng },
-                                            map: document.querySelector('gmp-map').innerMap,
-                                            title: locationName
-                                        });
-
-                                        // Add an info window for the marker
-                                        const infowindow = new google.maps.InfoWindow({
-                                            content: `<strong>${locationName}</strong><br>${results[0].formatted_address}`
-                                        });
-
-                                        marker.addListener('click', function() {
-                                            infowindow.open(document.querySelector('gmp-map').innerMap, marker);
-                                        });
-                                    } else {
-                                        console.log("Geocode was not successful for the following reason: " + status);
-                                    }
-                                });
-                            </script>
-                        @endforeach
-                    @else
-                        <p>No locations found for your trip.</p>
-                    @endif
-                </gmp-map>
+    <section id="itinerary-section" class="bg-black py-20">
+        <div class="container px-4 shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
+            <h3 class="text-3xl font-bold mb-6 text-center">Your Customised Itinerary</h3>
+            <div class="text-lg text-gray-600">
+                {!! nl2br(e($travelPlan)) !!}
             </div>
         </div>
     </section>
+
+    <section id="map-section" class="bg-black py-20">
+        <div class="container px-4 shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
+            <h3 class="text-3xl font-bold mb-6 text-center">Trip Map</h3>
+            <div id="map" class="map-container"></div>
+        </div>
+    </section>
 </main>
-
-<footer class="bg-blue-600 text-white py-2">
-    <div class="container mx-auto flex flex-col items-center space-y-4">
-        <div class="flex flex-col items-center space-y-1">
-            <img src="{{ asset('logos/logo-transparent-white.png') }}" alt="{{ config('app.name', 'Laravel') }}" class="h-16 w-auto">
-            <span class="text-l font-light">&copy; TripGenie - All Rights Reserved</span>
-        </div>
-
-        <div class="flex space-x-6">
-            <a href="#" aria-label="Facebook" class="hover:text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-7 h-7" viewBox="0 0 24 24">
-                    <path d="M22.675 0h-21.35c-.736 0-1.325.59-1.325 1.325v21.351c0 .735.59 1.324 1.325 1.324h11.495v-9.293h-3.125v-3.622h3.125v-2.672c0-3.097 1.891-4.788 4.655-4.788 1.325 0 2.462.099 2.795.143v3.243h-1.918c-1.506 0-1.796.717-1.796 1.767v2.307h3.591l-.467 3.622h-3.124v9.293h6.125c.735 0 1.325-.59 1.325-1.325v-21.35c0-.736-.59-1.326-1.325-1.326z"/>
-                </svg>
-            </a>
-            <a href="#" aria-label="Instagram" class="hover:text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-7 h-7" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.849.07 1.206.056 2.003.25 2.466.415a4.92 4.92 0 0 1 1.678.964c.42.391.766.859.964 1.678.165.463.36 1.26.415 2.466.059 1.266.071 1.646.071 4.849s-.012 3.584-.071 4.849c-.056 1.206-.25 2.003-.415 2.466a4.92 4.92 0 0 1-.964 1.678c-.391.42-.859.766-1.678.964-.463.165-1.26.36-2.466.415-1.266.059-1.646.071-4.849.071s-3.584-.012-4.849-.071c-1.206-.056-2.003-.25-2.466-.415a4.92 4.92 0 0 1-1.678-.964c-.42-.391-.766-.859-.964-1.678-.165-.463-.36-1.26-.415-2.466-.059-1.266-.071-1.646-.071-4.849s.012-3.584.071-4.849c.056-1.206.25-2.003.415-2.466a4.92 4.92 0 0 1 .964-1.678c.391-.42.859-.766 1.678-.964.463-.165 1.26-.36 2.466-.415 1.266-.059 1.646-.071 4.849-.071zm0-2.163c-3.271 0-3.67.013-4.947.072-1.262.059-2.129.252-2.87.532a6.992 6.992 0 0 0-2.509 1.568 6.992 6.992 0 0 0-1.568 2.509c-.28.741-.473 1.608-.532 2.87-.059 1.277-.072 1.676-.072 4.947s.013 3.67.072 4.947c.059 1.262.252 2.129.532 2.87a6.992 6.992 0 0 0 1.568 2.509 6.992 6.992 0 0 0 2.509 1.568c.741.28 1.608.473 2.87.532 1.277.059 1.676.072 4.947.072s3.67-.013 4.947-.072c1.262-.059 2.129-.252 2.87-.532a6.992 6.992 0 0 0 2.509-1.568 6.992 6.992 0 0 0 1.568-2.509c.28-.741.473-1.608.532-2.87.059-1.277.072-1.676.072-4.947s-.013-3.67-.072-4.947c-.059-1.262-.252-2.129-.532-2.87a6.992 6.992 0 0 0-1.568-2.509 6.992 6.992 0 0 0-2.509-1.568c-.741-.28-1.608-.473-2.87-.532-1.277-.059-1.676-.072-4.947-.072z"/>
-                    <path d="M12 5.838a6.162 6.162 0 1 0 6.162 6.162 6.169 6.169 0 0 0-6.162-6.162zm0 10.162a4 4 0 1 1 4-4 4.007 4.007 0 0 1-4 4zm6.406-11.845a1.44 1.44 0 1 0 1.44 1.44 1.438 1.438 0 0 0-1.44-1.44z"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-</footer>
 </body>
 </html>
