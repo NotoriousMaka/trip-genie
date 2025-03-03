@@ -30,7 +30,6 @@ class TripController extends Controller
         $country = $request->input('country');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $preference = $request->input('preference', 'adventure');
 
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
@@ -56,7 +55,7 @@ class TripController extends Controller
             'model' => 'gpt-3.5-turbo',
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a travel assistant. You need to provide detailed information about locations and travel plans. Also, provide travel tips for the location and take into consideration time, weather and any other relevant information.'],
-                ['role' => 'user', 'content' => "Create a travel plan for a $preference trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
+                ['role' => 'user', 'content' => "Create a travel plan for a trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
             ],
             'max_tokens' => 700,
         ]);
@@ -65,7 +64,7 @@ class TripController extends Controller
 
         $locations = $selectedCards;
 
-        return view('trip.plan', compact('travelPlan', 'locations', 'city', 'country', 'startDate', 'endDate', 'preference'));
+        return view('trip.plan', compact('travelPlan', 'locations', 'city', 'country', 'startDate', 'endDate'));
     }
 
     public function showTripPlan()

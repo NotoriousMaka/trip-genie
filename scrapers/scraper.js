@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 (async () => {
-    const city = 'Paris';
-    const country = 'France';
+    const city = 'Milan';
+    const country = 'Italy';
     const startTime = performance.now();
     const startCpuUsage = process.cpuUsage();
 
@@ -20,48 +20,89 @@ const __dirname = path.dirname(__filename);
         const page = await browser.newPage();
         console.log('New page created.');
 
-        // Construct the URL using the city, country, and category
+        // Construct the URL using the city and country
         const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
         console.log(`Navigating to ${url}...`);
 
         await page.goto(url);
         console.log('Navigated to the specified URL.');
 
-        // Wait for the "Accept Cookies" button to be visible and click it
-        await page.waitForSelector('#onetrust-accept-btn-handler', { timeout: 10000 });
-        console.log('Accept Cookies button found.');
-        await page.click('#onetrust-accept-btn-handler');
-        console.log('Accept Cookies button clicked.');
-
-        // Wait for the "Consent" button to be visible and click it
-        await page.waitForSelector('.fc-button.fc-cta-consent.fc-primary-button', { timeout: 10000 });
-        console.log('Consent button found.');
-        await page.click('.fc-button.fc-cta-consent.fc-primary-button');
-        console.log('Consent button clicked.');
-
-        // Wait for the cards to load
-        await page.waitForSelector('.geo-places .CardWrapper', { timeout: 10000 });
-        console.log('Cards loaded.');
-
-        // Select 100 random cards
-        const cards = await page.evaluate(() => {
-            const cardElements = Array.from(document.querySelectorAll('.geo-places .CardWrapper'));
-            const selectedCards = [];
-            while (selectedCards.length < 100 && cardElements.length > 0) {
-                const randomIndex = Math.floor(Math.random() * cardElements.length);
-                const card = cardElements.splice(randomIndex, 1)[0];
-                const name = card.querySelector('.Card__heading span').innerText;
-                const description = card.querySelector('.Card__content').innerText;
-                selectedCards.push({ name, description });
-            }
-            return selectedCards;
+        // Check for error message
+        const errorExists = await page.evaluate(() => {
+            const errorElement = document.querySelector('.col-xs-12 .icon-atlas-icon + h2.title-lg');
+            return errorElement && errorElement.innerText.includes('Something went wrong on our end.');
         });
 
-        console.log('Selected cards:', cards);
+        if (errorExists) {
+            console.log('Error detected on the page. Using only the scraped data so far.');
+            await browser.close();
+            return;
+        }
 
-        // Write the selected cards to a file in the /scrapers folder
+        // Wait for the "Accept Cookies" button to be visible and click it
+        await page.waitForSelector('#onetrust-accept-btn-handler', { timeout: 10000 }).then(async () => {
+            console.log('Accept Cookies button found.');
+            await page.click('#onetrust-accept-btn-handler');
+            console.log('Accept Cookies button clicked.');
+        }).catch(() => console.log('No Accept Cookies button found.'));
+
+        // Wait for the "Consent" button to be visible and click it
+        await page.waitForSelector('.fc-button.fc-cta-consent.fc-primary-button', { timeout: 10000 }).then(async () => {
+            console.log('Consent button found.');
+            await page.click('.fc-button.fc-cta-consent.fc-primary-button');
+            console.log('Consent button clicked.');
+        }).catch(() => console.log('No Consent button found.'));
+
+        let allCards = [];
+        let currentPage = 1;
+
+        while (allCards.length < 100) {
+            // Wait for the cards to load
+            await page.waitForSelector('.geo-places .CardWrapper', { timeout: 10000 });
+            console.log('Cards loaded.');
+
+            // Select cards
+            const cards = await page.evaluate(() => {
+                const cardElements = Array.from(document.querySelectorAll('.geo-places .CardWrapper'));
+                return cardElements.map(card => {
+                    const name = card.querySelector('.Card__heading span')?.innerText || 'No name';
+                    const description = card.querySelector('.Card__content')?.innerText || 'No description';
+                    return { name, description };
+                });
+            });
+
+            allCards = [...allCards, ...cards];
+            console.log(`Total cards collected: ${allCards.length}`);
+
+            if (allCards.length >= 100) break;
+
+            // Navigate to the next page
+            currentPage++;
+            const nextPageUrl = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places?page=${currentPage}`;
+            console.log(`Navigating to ${nextPageUrl}...`);
+            await page.goto(nextPageUrl);
+            console.log('Navigated to the next page.');
+
+            // Check for error page on next pages
+            const nextPageError = await page.evaluate(() => {
+                const errorElement = document.querySelector('.col-xs-12 .icon-atlas-icon + h2.title-lg');
+                return errorElement && errorElement.innerText.includes('Something went wrong on our end.');
+            });
+
+            if (nextPageError) {
+                console.log('Error detected on this page. Stopping further scraping.');
+                break;
+            }
+        }
+
+        // Limit to 100 cards
+        allCards = allCards.slice(0, 100);
+
+        console.log('Selected cards:', allCards);
+
+        // Write the selected cards to a file
         const filePath = path.join(__dirname, 'selected_cards.json');
-        fs.writeFileSync(filePath, JSON.stringify(cards, null, 2));
+        fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
         console.log('Selected cards written to scrapers/selected_cards.json');
 
         await browser.close();
