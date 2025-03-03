@@ -147,18 +147,6 @@
                         </div>
                     </div>
 
-                    <!-- Preference Dropdown -->
-                    <div>
-                        <label for="preference" class="block text-gray-600 font-medium mb-2">Preference</label>
-                        <select id="preference" name="preference" class="w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-600">
-                            <option value="adventure">Adventure</option>
-                            <option value="relaxation">Relaxation</option>
-                            <option value="culture">Culture</option>
-                            <option value="nature">Nature</option>
-                            <option value="food">Food</option>
-                        </select>
-                    </div>
-
                     <!-- Submit Button -->
                     <div class="flex justify-center">
                         <button type="submit" class="submit-btn">

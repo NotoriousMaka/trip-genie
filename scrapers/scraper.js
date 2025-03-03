@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 (async () => {
     const city = 'Paris';
     const country = 'France';
-    const category = 'architecture';
     const startTime = performance.now();
     const startCpuUsage = process.cpuUsage();
 
@@ -22,7 +21,7 @@ const __dirname = path.dirname(__filename);
         console.log('New page created.');
 
         // Construct the URL using the city, country, and category
-        const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/${category}`;
+        const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
         console.log(`Navigating to ${url}...`);
 
         await page.goto(url);
@@ -44,11 +43,11 @@ const __dirname = path.dirname(__filename);
         await page.waitForSelector('.geo-places .CardWrapper', { timeout: 10000 });
         console.log('Cards loaded.');
 
-        // Select 5 random cards
+        // Select 100 random cards
         const cards = await page.evaluate(() => {
             const cardElements = Array.from(document.querySelectorAll('.geo-places .CardWrapper'));
             const selectedCards = [];
-            while (selectedCards.length < 5 && cardElements.length > 0) {
+            while (selectedCards.length < 100 && cardElements.length > 0) {
                 const randomIndex = Math.floor(Math.random() * cardElements.length);
                 const card = cardElements.splice(randomIndex, 1)[0];
                 const name = card.querySelector('.Card__heading span').innerText;
