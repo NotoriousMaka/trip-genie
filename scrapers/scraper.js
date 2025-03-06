@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 (async () => {
-    const city = 'Milan';
-    const country = 'Italy';
+    const city = 'Paris';
+    const country = 'France';
     const startTime = performance.now();
     const startCpuUsage = process.cpuUsage();
 

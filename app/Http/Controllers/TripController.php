@@ -10,6 +10,7 @@ class TripController extends Controller
 {
     public function store(Request $request)
     {
+        // Validate input
         $request->validate([
             'city' => 'required|string',
             'country' => 'required|string',
@@ -18,71 +19,77 @@ class TripController extends Controller
             'preference' => 'string|in:adventure,relaxation,culture,nature,food',
         ]);
 
-        $scriptPath = base_path('scrapers/scraper.js');
-        $command = "cd " . base_path() . " && node scrapers/scraper.js";
-        exec($command, $output, $return_var);
+        // Execute scrapers
+        exec("cd " . base_path() . " && node scrapers/scraper.js", $output1, $return_var1);
+        exec("cd " . base_path() . " && node scrapers/scraper-2.js", $output2, $return_var2);
 
-        if ($return_var !== 0) {
-            return response()->json(['error' => 'Failed to run scraper script'], 500);
+        if ($return_var1 !== 0 || $return_var2 !== 0) {
+            return response()->json(['error' => 'Failed to run scraper scripts'], 500);
         }
 
+        // Retrieve input values
         $city = $request->input('city');
         $country = $request->input('country');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
+        // OpenAI API setup
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
             return response()->json(['error' => 'OpenAI API key is not set'], 500);
         }
-
         $client = OpenAI::client($apiKey);
 
-        $filePath = base_path('scrapers/selected_cards.json');
-        if (!File::exists($filePath)) {
-            return response()->json(['error' => 'Selected cards file does not exist'], 500);
+        // Retrieve scraped data
+        $filePath1 = base_path('scrapers/selected_cards.json');
+        $filePath2 = base_path('scrapers/wikivoyage_data.json');
+
+        if (!File::exists($filePath1) || !File::exists($filePath2)) {
+            return response()->json(['error' => 'Scraped data files do not exist'], 500);
         }
 
-        $selectedCards = json_decode(File::get($filePath), true);
+        $selectedCards = json_decode(File::get($filePath1), true);
+        $wikiData = json_decode(File::get($filePath2), true);
 
-        $cardsContent = '';
+        // Format content for AI request
+        $cardsContent = "";
         foreach ($selectedCards as $card) {
-            $cardsContent .= "Name: {$card['name']}\nDescription: {$card['description']}\n\n";
+            $timeSpent = isset($card['time_spent']) ? "{$card['time_spent']} minutes" : "Time not specified";
+            $cardsContent .= "{$card['name']}\nDescription: {$card['description']}\nDuration: $timeSpent\n\n";
         }
 
-        // Using the gpt-3.5-turbo chat model
+        // Extract Wiki data
+        $wikiContent = implode("\n", array_map(fn($item) => $item['description'] ?? '', $wikiData));
+
+        // AI-generated travel plan
         $response = $client->chat()->create([
             'model' => 'gpt-3.5-turbo',
             'messages' => [
-                ['role' => 'system', 'content' => 'You are a travel assistant. You need to provide detailed information about locations and travel plans. Also, provide travel tips for the location and take into consideration time, weather and any other relevant information.'],
-                ['role' => 'user', 'content' => "Create a travel plan for a trip to $city, $country from $startDate to $endDate. Here are some places to visit:\n\n$cardsContent"],
+                ['role' => 'system', 'content' => 'You are a travel assistant that creates structured, engaging itineraries with full-day activities, walking times, and meal breaks.'],
+                ['role' => 'user', 'content' => "Create a structured itinerary for $city, $country from $startDate to $endDate.
+                Format it as follows:
+
+                Day X:
+                - 9:00 AM - Activity Name (Duration: X minutes)
+                - 11:00 AM - Activity Name (Duration: X minutes, Walking Time: X minutes)
+                - 1:00 PM - Lunch Break (Suggested restaurants: X, Y, Z)
+                - 3:00 PM - Activity Name (Duration: X minutes, Walking Time: X minutes)
+                - 6:00 PM - Dinner (Suggested restaurants: X, Y, Z)
+                - 8:00 PM - Evening Activity (Duration: X minutes, Walking Time: X minutes)
+
+                Use the following data:
+                $cardsContent
+                Additional info:
+                $wikiContent
+
+                Provide travel tips and best visit times for each place mentioned."],
             ],
-            'max_tokens' => 700,
+            'max_tokens' => 4000,
         ]);
 
         $travelPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated.';
-
-        $locations = $selectedCards;
+        $locations = array_merge($selectedCards, array_map(fn($desc) => ['name' => 'Wikivoyage Info', 'description' => $desc], $wikiData));
 
         return view('trip.plan', compact('travelPlan', 'locations', 'city', 'country', 'startDate', 'endDate'));
-    }
-
-    public function showTripPlan()
-    {
-        $filePath = base_path('scrapers/selected_cards.json');
-
-        if (!File::exists($filePath)) {
-            return response()->json(['error' => 'Selected cards file does not exist'], 500);
-        }
-
-        $jsonData = file_get_contents($filePath);
-
-        $locations = json_decode($jsonData, true);
-
-        if (!is_array($locations)) {
-            $locations = [];
-        }
-
-        return view('trip.plan', compact('locations'));
     }
 }
