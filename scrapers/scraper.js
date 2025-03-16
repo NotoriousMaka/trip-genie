@@ -6,13 +6,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Get command line arguments
+const city = process.argv[2];
+const country = process.argv[3];
+
+// Define cache filename
+const cacheFileName = `${city.toLowerCase()}-${country.toLowerCase()}-atlas.json`;
+const cachePath = path.join(__dirname, 'cache', cacheFileName);
+
 (async () => {
-    const city = process.argv[2];
-    const country = process.argv[3];
     const startTime = performance.now();
     const startCpuUsage = process.cpuUsage();
 
+    console.log(`Scraping Atlas Obscura for ${city}, ${country}...`);
+
     try {
+        // Create cache directory if it doesn't exist
+        const cacheDir = path.join(__dirname, 'cache');
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+
         console.log('Launching browser...');
         const browser = await puppeteer.launch({ headless: false });
         console.log('Browser launched.');
@@ -100,10 +114,14 @@ const __dirname = path.dirname(__filename);
 
         console.log('Selected cards:', allCards);
 
-        // Write the selected cards to a file
+        // Write the selected cards to the regular file
         const filePath = path.join(__dirname, 'selected_cards.json');
         fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
         console.log('Selected cards written to scrapers/selected_cards.json');
+
+        // Write to cache file
+        fs.writeFileSync(cachePath, JSON.stringify(allCards, null, 2));
+        console.log(`Cache saved to ${cachePath}`);
 
         await browser.close();
         console.log('Browser closed.');

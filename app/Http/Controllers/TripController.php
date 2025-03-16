@@ -19,21 +19,59 @@ class TripController extends Controller
             'preference' => 'string|in:adventure,relaxation,culture,nature,food',
         ]);
 
-        $city = escapeshellarg($request->input('city'));
-        $country = escapeshellarg($request->input('country'));
-
-        exec("cd " . base_path() . " && node scrapers/scraper.js $city $country", $output1, $return_var1);
-        exec("cd " . base_path() . " && node scrapers/scraper-2.js $city", $output2, $return_var2);
-
-        if ($return_var1 !== 0 || $return_var2 !== 0) {
-            return response()->json(['error' => 'Failed to run scraper scripts'], 500);
-        }
-
         // Retrieve input values
         $city = $request->input('city');
         $country = $request->input('country');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+
+        // Define cache file paths
+        $cityCountryKey = strtolower($city) . '-' . strtolower($country);
+        $atlasCache = base_path("scrapers/cache/{$cityCountryKey}-atlas.json");
+        $wikiCache = base_path("scrapers/cache/{$cityCountryKey}-wikivoyage.json");
+
+        $atlasDataPath = base_path('scrapers/selected_cards.json');
+        $wikiDataPath = base_path('scrapers/wikivoyage_data.json');
+
+        // Check if cache exists for Atlas Obscura data
+        $runAtlasScraper = true;
+        if (File::exists($atlasCache)) {
+            // Copy cache to the expected location
+            File::copy($atlasCache, $atlasDataPath);
+            $runAtlasScraper = false;
+            \Log::info("Using cached Atlas Obscura data for {$city}, {$country}");
+        }
+
+        // Check if cache exists for Wikivoyage data
+        $runWikiScraper = true;
+        if (File::exists($wikiCache)) {
+            // Copy cache to the expected location
+            File::copy($wikiCache, $wikiDataPath);
+            $runWikiScraper = false;
+            \Log::info("Using cached Wikivoyage data for {$city}, {$country}");
+        }
+
+        // Run scrapers only if needed
+        $cityArg = escapeshellarg($city);
+        $countryArg = escapeshellarg($country);
+
+        if ($runAtlasScraper) {
+            \Log::info("Running Atlas Obscura scraper for {$city}, {$country}");
+            exec("cd " . base_path() . " && node scrapers/scraper.js {$cityArg} {$countryArg}", $output1, $return_var1);
+
+            if ($return_var1 !== 0) {
+                return response()->json(['error' => 'Failed to run Atlas Obscura scraper script'], 500);
+            }
+        }
+
+        if ($runWikiScraper) {
+            \Log::info("Running Wikivoyage scraper for {$city}");
+            exec("cd " . base_path() . " && node scrapers/scraper-2.js {$cityArg} {$countryArg}", $output2, $return_var2);
+
+            if ($return_var2 !== 0) {
+                return response()->json(['error' => 'Failed to run Wikivoyage scraper script'], 500);
+            }
+        }
 
         // OpenAI API setup
         $apiKey = env('OPENAI_API_KEY');
@@ -42,16 +80,13 @@ class TripController extends Controller
         }
         $client = OpenAI::client($apiKey);
 
-        // Retrieve scraped data
-        $filePath1 = base_path('scrapers/selected_cards.json');
-        $filePath2 = base_path('scrapers/wikivoyage_data.json');
-
-        if (!File::exists($filePath1) || !File::exists($filePath2)) {
+        // Check if scraped data files exist
+        if (!File::exists($atlasDataPath) || !File::exists($wikiDataPath)) {
             return response()->json(['error' => 'Scraped data files do not exist'], 500);
         }
 
-        $selectedCards = json_decode(File::get($filePath1), true);
-        $wikiData = json_decode(File::get($filePath2), true);
+        $selectedCards = json_decode(File::get($atlasDataPath), true);
+        $wikiData = json_decode(File::get($wikiDataPath), true);
 
         // Format content for AI request
         $cardsContent = "";
@@ -61,7 +96,14 @@ class TripController extends Controller
         }
 
         // Extract Wiki data
-        $wikiContent = implode("\n", array_map(fn($item) => $item['description'] ?? '', $wikiData));
+        $wikiContent = "";
+        foreach ($wikiData as $section => $items) {
+            $wikiContent .= "--- {$section} ---\n";
+            foreach ($items as $item) {
+                $wikiContent .= "• {$item}\n";
+            }
+            $wikiContent .= "\n";
+        }
 
         // AI-generated travel plan
         $response = $client->chat()->create([
@@ -90,7 +132,25 @@ class TripController extends Controller
         ]);
 
         $travelPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated.';
-        $locations = array_merge($selectedCards, array_map(fn($desc) => ['name' => 'Wikivoyage Info', 'description' => $desc], $wikiData));
+
+        // Prepare location data for the view
+        $locations = [];
+        foreach ($selectedCards as $card) {
+            $locations[] = [
+                'name' => $card['name'],
+                'description' => $card['description']
+            ];
+        }
+
+        // Add wiki data to locations array
+        foreach ($wikiData as $section => $items) {
+            foreach ($items as $item) {
+                $locations[] = [
+                    'name' => "Wikivoyage: {$section}",
+                    'description' => $item
+                ];
+            }
+        }
 
         return view('trip.plan', compact('travelPlan', 'locations', 'city', 'country', 'startDate', 'endDate'));
     }

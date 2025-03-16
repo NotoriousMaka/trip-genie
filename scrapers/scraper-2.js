@@ -6,12 +6,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Get command line arguments
+const city = process.argv[2];
+const country = process.argv[3];
+
+// Define cache filename
+const cacheFileName = `${city.toLowerCase()}-${country.toLowerCase()}-wikivoyage.json`;
+const cachePath = path.join(__dirname, 'cache', cacheFileName);
+
 (async () => {
-    const city = process.argv[2];
     const startTime = performance.now();
     const startCpuUsage = process.cpuUsage();
 
+    console.log(`Scraping Wikivoyage for ${city}...`);
+
     try {
+        // Create cache directory if it doesn't exist
+        const cacheDir = path.join(__dirname, 'cache');
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+
         console.log('Launching browser...');
         const browser = await puppeteer.launch({ headless: false });
         console.log('Browser launched.');
@@ -62,10 +77,14 @@ const __dirname = path.dirname(__filename);
             return sectionData;
         }, sections);
 
-        // Write the extracted data to a JSON file
+        // Write the extracted data to the regular JSON file
         const filePath = path.join(__dirname, 'wikivoyage_data.json');
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
         console.log('Data written to wikivoyage_data.json');
+
+        // Write to cache file
+        fs.writeFileSync(cachePath, JSON.stringify(data, null, 2));
+        console.log(`Cache saved to ${cachePath}`);
 
         await browser.close();
         console.log('Browser closed.');
