@@ -19,9 +19,11 @@ class TripController extends Controller
             'preference' => 'string|in:adventure,relaxation,culture,nature,food',
         ]);
 
-        // Execute scrapers
-        exec("cd " . base_path() . " && node scrapers/scraper.js", $output1, $return_var1);
-        exec("cd " . base_path() . " && node scrapers/scraper-2.js", $output2, $return_var2);
+        $city = escapeshellarg($request->input('city'));
+        $country = escapeshellarg($request->input('country'));
+
+        exec("cd " . base_path() . " && node scrapers/scraper.js $city $country", $output1, $return_var1);
+        exec("cd " . base_path() . " && node scrapers/scraper-2.js $city", $output2, $return_var2);
 
         if ($return_var1 !== 0 || $return_var2 !== 0) {
             return response()->json(['error' => 'Failed to run scraper scripts'], 500);
