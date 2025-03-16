@@ -115,9 +115,9 @@ const cachePath = path.join(__dirname, 'cache', cacheFileName);
         console.log('Selected cards:', allCards);
 
         // Write the selected cards to the regular file
-        const filePath = path.join(__dirname, 'selected_cards.json');
+        const filePath = path.join(__dirname, 'atlas_data.json');
         fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
-        console.log('Selected cards written to scrapers/selected_cards.json');
+        console.log('Selected cards written to scrapers/atlas_data.json');
 
         // Write to cache file
         fs.writeFileSync(cachePath, JSON.stringify(allCards, null, 2));
