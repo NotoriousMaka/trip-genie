@@ -30,17 +30,19 @@ class TripController extends Controller
         $atlasCache = base_path("scrapers/cache/{$cityCountryKey}-atlas.json");
         $wikiCache = base_path("scrapers/cache/{$cityCountryKey}-wikivoyage.json");
         $lonelyPlanetCache = base_path("scrapers/cache/{$cityCountryKey}-lonelyplanet.json");
+        $yelpCache = base_path("scrapers/cache/{$cityCountryKey}-yelp.json");
 
+        // Define data file paths
         $atlasDataPath = base_path('scrapers/atlas-data.json');
         $wikiDataPath = base_path('scrapers/wikivoyage_data.json');
         $lonelyPlanetDataPath = base_path('scrapers/lonelyplanet_data.json');
+        $yelpDataPath = base_path('scrapers/yelp_data.json');
 
         // Check if cache exists for Atlas Obscura data
         $runAtlasScraper = true;
         if (File::exists($atlasCache)) {
             File::copy($atlasCache, $atlasDataPath);
             $runAtlasScraper = false;
-            \Log::info("Using cached Atlas Obscura data for {$city}, {$country}");
         }
 
         // Check if cache exists for Wikivoyage data
@@ -48,7 +50,6 @@ class TripController extends Controller
         if (File::exists($wikiCache)) {
             File::copy($wikiCache, $wikiDataPath);
             $runWikiScraper = false;
-            \Log::info("Using cached Wikivoyage data for {$city}, {$country}");
         }
 
         // Check if cache exists for Lonely Planet data
@@ -56,7 +57,13 @@ class TripController extends Controller
         if (File::exists($lonelyPlanetCache)) {
             File::copy($lonelyPlanetCache, $lonelyPlanetDataPath);
             $runLonelyPlanetScraper = false;
-            \Log::info("Using cached Lonely Planet data for {$city}, {$country}");
+        }
+
+        // Check if cache exists for Yelp data
+        $runYelpScraper = true;
+        if (File::exists($yelpCache)) {
+            File::copy($yelpCache, $yelpDataPath);
+            $runYelpScraper = false;
         }
 
         // Run scrapers only if needed
@@ -64,27 +71,19 @@ class TripController extends Controller
         $countryArg = escapeshellarg($country);
 
         if ($runAtlasScraper) {
-            \Log::info("Running Atlas Obscura scraper for {$city}, {$country}");
             exec("cd " . base_path() . " && node scrapers/scraper.js {$cityArg} {$countryArg}", $output1, $return_var1);
-            if ($return_var1 !== 0) {
-                return response()->json(['error' => 'Failed to run Atlas Obscura scraper script'], 500);
-            }
         }
 
         if ($runWikiScraper) {
-            \Log::info("Running Wikivoyage scraper for {$city}");
             exec("cd " . base_path() . " && node scrapers/scraper-2.js {$cityArg} {$countryArg}", $output2, $return_var2);
-            if ($return_var2 !== 0) {
-                return response()->json(['error' => 'Failed to run Wikivoyage scraper script'], 500);
-            }
         }
 
         if ($runLonelyPlanetScraper) {
-            \Log::info("Running Lonely Planet scraper for {$city}, {$country}");
             exec("cd " . base_path() . " && node scrapers/scraper-3.js {$cityArg} {$countryArg}", $output3, $return_var3);
-            if ($return_var3 !== 0) {
-                return response()->json(['error' => 'Failed to run Lonely Planet scraper script'], 500);
-            }
+        }
+
+        if ($runYelpScraper) {
+            exec("cd " . base_path() . " && node scrapers/scraper-4.js {$cityArg} {$countryArg}", $output4, $return_var4);
         }
 
         // OpenAI API setup
@@ -95,13 +94,14 @@ class TripController extends Controller
         $client = OpenAI::client($apiKey);
 
         // Check if scraped data files exist
-        if (!File::exists($atlasDataPath) || !File::exists($wikiDataPath) || !File::exists($lonelyPlanetDataPath)) {
+        if (!File::exists($atlasDataPath) || !File::exists($wikiDataPath) || !File::exists($lonelyPlanetDataPath) || !File::exists($yelpDataPath)) {
             return response()->json(['error' => 'Scraped data files do not exist'], 500);
         }
 
         $selectedCards = json_decode(File::get($atlasDataPath), true);
         $wikiData = json_decode(File::get($wikiDataPath), true);
         $lonelyPlanetData = json_decode(File::get($lonelyPlanetDataPath), true);
+        $yelpData = json_decode(File::get($yelpDataPath), true);
 
         // Format content for AI request
         $cardsContent = "";
@@ -128,37 +128,65 @@ class TripController extends Controller
             $lonelyPlanetContent .= "{$name}\nDescription: {$description}\n\n";
         }
 
-        // AI-generated travel plan
-        $response = $client->chat()->create([
-            'model' => 'gpt-3.5-turbo',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a travel assistant that creates structured, engaging itineraries with full-day activities, walking times, and meal breaks.'],
-                ['role' => 'user', 'content' => "Create a structured itinerary for $city, $country from $startDate to $endDate.
-        Format it as follows:
+        // Extract Yelp restaurant data
+        $yelpContent = "";
+        if (isset($yelpData['restaurants'])) {
+            foreach ($yelpData['restaurants'] as $restaurant) {
+                $name = $restaurant['name'] ?? 'Unknown Restaurant';
+                $rating = $restaurant['rating'] ?? 'No rating available';
+                $location = $restaurant['location'] ?? 'No location available';
+                $yelpContent .= "{$name}\nRating: {$rating}\nLocation: {$location}\n\n";
+            }
+        }
 
-        Day X:
-        - 9:00 AM - Activity Name
-        - 11:00 AM - Activity Name
-        - 1:00 PM - Lunch Break
-        - 3:00 PM - Activity Name
-        - 6:00 PM - Dinner
-        - 8:00 PM - Evening Activity
+        // Log Yelp content to the console
+        error_log("Yelp Content: \n" . $yelpContent);
 
-        I want you to give suggestions from the data I provide.
-        For each activity, lunch break and dinner provide a brief description, the best time to visit, address and phone number.
-        Make sure every day has all of the above elements.
+        // Calculate the date range
+        $startDateObj = \Carbon\Carbon::parse($startDate);
+        $endDateObj = \Carbon\Carbon::parse($endDate);
+        $dateRange = $startDateObj->diffInDays($endDateObj) + 1; // Inclusive of both start and end dates
 
-        Use the following data:
-        $cardsContent
-        $wikiContent
-        $lonelyPlanetContent
+        // AI-generated travel plan for each day
+        $travelPlan = '';
+        $dayCounter = 1; // To handle day number
+        for ($i = 0; $i < $dateRange; $i++) {
+            $currentDate = $startDateObj->addDays($i)->format('Y-m-d');
 
-        Generate a detailed itinerary for each day from $startDate to $endDate."],
-            ],
-            'max_tokens' => 4096,
-        ]);
+            // Generate daily itinerary for each day
+            $response = $client->chat()->create([
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a travel assistant that creates structured, engaging itineraries with full-day activities, walking times, and meal breaks.'],
+                    ['role' => 'user', 'content' => "Create a detailed itinerary for $city, $country on $currentDate.
+                    Format it as follows:
 
-        $travelPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated.';
+                    Day {$dayCounter}:
+                    - 9:00 AM - Activity Name
+                    - 11:00 AM - Activity Name
+                    - 1:00 PM - Lunch Break
+                    - 3:00 PM - Activity Name
+                    - 6:00 PM - Dinner
+                    - 8:00 PM - Evening Activity
+
+                    I want you to give suggestions from the data I provide.
+                    For each activity, lunch break, and dinner, provide a brief description, the best time to visit, address, and phone number.
+
+                    For the lunch break and dinner, suggest a restaurant from the Yelp data.
+                    Use the following data:
+                    $cardsContent
+                    $wikiContent
+                    $lonelyPlanetContent
+                    $yelpContent
+                    "],
+                ],
+                'max_tokens' => 1024, // Adjust the token limit as necessary
+            ]);
+
+            $dayPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated for this day.';
+            $travelPlan .= "\n\n$dayPlan";
+            $dayCounter++; // Increment day count
+        }
 
         // Prepare location data for the view
         $locations = [];
@@ -186,6 +214,17 @@ class TripController extends Controller
             $locations[] = [
                 'name' => "Lonely Planet: {$name}",
                 'description' => $description
+            ];
+        }
+
+        // Add Yelp data to locations array
+        foreach ($yelpData as $restaurant) {
+            $name = $restaurant['name'] ?? 'Unknown Restaurant';
+            $rating = $restaurant['rating'] ?? 'No rating available';
+            $location = $restaurant['location'] ?? 'No location available';
+            $locations[] = [
+                'name' => "Yelp: {$name}",
+                'description' => "Rating: {$rating}\nLocation: {$location}",
             ];
         }
 
