@@ -139,9 +139,6 @@ class TripController extends Controller
             }
         }
 
-        // Log Yelp content to the console
-        error_log("Yelp Content: \n" . $yelpContent);
-
         // Calculate the date range
         $startDateObj = \Carbon\Carbon::parse($startDate);
         $endDateObj = \Carbon\Carbon::parse($endDate);
