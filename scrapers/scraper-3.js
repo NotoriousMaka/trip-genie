@@ -52,7 +52,7 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             const link = links[i];
 
             await page.goto(link, { waitUntil: "networkidle2" });
-            console.log(`Navigated to attraction.`);
+            console.log("Navigated to attraction.");
 
             const readMoreButton = await page.$("button.text-blue.font-semibold.mt-2.block.mx-auto");
             if (readMoreButton) {
@@ -69,7 +69,7 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             const addressElement = await page.$("a[href^=\"https://www.google.com/maps?q=\"]");
             const address = addressElement ? await page.evaluate(el => el.href, addressElement) : null;
 
-            const phoneElement = await page.$('a[href^="tel:"]');
+            const phoneElement = await page.$("a[href^=\"tel:\"]");
             const phone = phoneElement ? await page.evaluate(el => el.innerText, phoneElement) : null;
 
             attractionData.push({
@@ -81,9 +81,10 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
         }
 
         fs.writeFileSync(cachePath, JSON.stringify(attractionData, null, 2));
-        console.log(`Cache saved.`);
+        console.log("Cache saved.");
 
         await browser.close();
+        Console.log("Browser closed.")
 
         const endTime = performance.now();
         const endCPU = process.cpuUsage(startCPU);
@@ -93,6 +94,6 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
         console.log(`Total time: ${totalTime.toFixed(2)} seconds`);
         console.log(`CPU usage: ${cpuUsage.toFixed(2)}%`);
     } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
     }
 })();
