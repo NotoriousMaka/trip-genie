@@ -106,7 +106,7 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
         const totalTime = (endTime - startTime) / 1000;
         const cpuUsage = (endCPU.user + endCPU.system) / 1000000;
 
-        console.log(`Elapsed time: ${totalTime.toFixed(2)} seconds.`);
+        console.log(`Total time: ${totalTime.toFixed(2)} seconds.`);
         console.log(`CPU usage: ${cpuUsage.toFixed(2)}%.`);
     } catch (error) {
         console.error('Error:', error);
