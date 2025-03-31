@@ -23,14 +23,9 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
         }
 
         const browser = await puppeteer.launch({ headless: false });
-        console.log('Browser launched.');
-
         const page = await browser.newPage();
-        console.log('New page created.');
 
         const url = `https://en.wikivoyage.org/wiki/${city.replace(' ', '_')}`;
-        console.log(`Navigating to URL.`);
-
         await page.goto(url);
         console.log('Navigated to URL.');
 
@@ -72,13 +67,11 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
 
         const filePath = path.join(__dirname, 'wikivoyage_data.json');
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        console.log('Data written to wikivoyage_data.json');
 
         fs.writeFileSync(cachePath, JSON.stringify(data, null, 2));
-        console.log(`Cache saved to ${cachePath}`);
+        console.log(`Cache saved.`);
 
         await browser.close();
-        console.log('Browser closed.');
 
         const endTime = performance.now();
         const endCPU = process.cpuUsage(startCPU);
