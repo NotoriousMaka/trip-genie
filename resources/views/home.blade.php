@@ -22,7 +22,7 @@
             flex-direction: column;
         }
         .logo-container img {
-            width: 300px; /* Increase the width */
+            width: 300px;
             height: auto;
             margin-bottom: 1rem;
         }

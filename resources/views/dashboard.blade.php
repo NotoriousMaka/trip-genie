@@ -115,13 +115,12 @@
         <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Create Your Travel Plan</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-                Discover the world with TripGenie, your trusted AI travel companion.
+                Discover the world with TripGenie, your trusted AI travel friend.
             </p>
 
             <form action="{{ route('create-plan') }}" method="POST">
                 @csrf
                 <div class="space-y-6">
-                    <!-- City and Country Inputs (Aligned Horizontally) -->
                     <div class="flex space-x-6">
                         <div class="w-1/2">
                             <label for="city" class="block text-gray-600 font-medium mb-2">City</label>
@@ -134,7 +133,6 @@
                         </div>
                     </div>
 
-                    <!-- Make sure these match exactly what your controller expects -->
                     <div class="flex space-x-6">
                         <div class="w-1/2">
                             <label for="start_date" class="block text-gray-600 font-medium mb-2">Start Date</label>
