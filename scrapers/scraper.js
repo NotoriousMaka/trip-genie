@@ -23,14 +23,9 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
         }
 
         const browser = await puppeteer.launch({ headless: false });
-        console.log('Browser launched.');
-
         const page = await browser.newPage();
-        console.log('New page created.');
 
         const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
-        console.log(`Navigating to URL.`);
-
         await page.goto(url);
         console.log('Navigated to URL.');
 
@@ -57,7 +52,6 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
 
         while (allCards.length < 100) {
             await page.waitForSelector('.geo-places .CardWrapper', { timeout: 10000 });
-            console.log('Cards loaded.');
 
             const cards = await page.evaluate(() => {
                 const cardElements = Array.from(document.querySelectorAll('.geo-places .CardWrapper'));
@@ -99,7 +93,6 @@ const cachePath = path.join(__dirname, 'cache', cacheFile);
         console.log(`Cache saved.`);
 
         await browser.close();
-        console.log('Browser closed.');
 
         const endTime = performance.now();
         const endCPU = process.cpuUsage(startCPU);
