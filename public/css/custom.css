@@ -11,8 +11,8 @@ html, body {
 }
 
 .form_container {
-    width: 80%; /* Adjust this value as needed */
-    max-width: 200px; /* Set a maximum width */
+    width: 80%;
+    max-width: 200px;
     height: fit-content;
     display: flex;
     flex-direction: column;
