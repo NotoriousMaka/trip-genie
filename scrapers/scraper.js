@@ -13,6 +13,11 @@ const cacheFile = `${city.toLowerCase()}-${country.toLowerCase()}-atlas.json`;
 const cachePath = path.join(__dirname, "cache", cacheFile);
 
 (async () => {
+    if (fs.existsSync(cachePath)) {
+        console.log("Using cached data.");
+        console.log(fs.readFileSync(cachePath, "utf-8"));
+        return;
+    }
     const startTime = performance.now();
     const startCPU = process.cpuUsage();
 
@@ -22,8 +27,20 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             fs.mkdirSync(cacheDir, { recursive: true });
         }
 
-        const browser = await puppeteer.launch({ headless: false });
+        const browser = await puppeteer.launch({ headless: "true" });
         const page = await browser.newPage();
+        await page.setViewport({ width: 800, height: 600 });
+        await page.setRequestInterception(true);
+        page.on("request", (req) => {
+            const blockedResources = ["image", "stylesheet", "font", "media", "other"];
+            if (blockedResources.includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+
+
 
         const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
         await page.goto(url);
@@ -39,7 +56,7 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             return;
         }
 
-        await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 10000 }).then(async () => {
+        await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 }).then(async () => {
             await page.click("#onetrust-accept-btn-handler");
         }).catch(() => console.log("No Accept Cookies button found."));
 
@@ -50,16 +67,14 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
         let allCards = [];
         let currentPage = 1;
 
-        while (allCards.length < 100) {
-            await page.waitForSelector(".geo-places .CardWrapper", { timeout: 10000 });
+        while (allCards.length < 50) {
+            await page.waitForSelector(".geo-places .CardWrapper", { timeout: 5000 });
 
             const cards = await page.evaluate(() => {
-                const cardElements = Array.from(document.querySelectorAll(".geo-places .CardWrapper"));
-                return cardElements.map(card => {
-                    const name = card.querySelector(".Card__heading span")?.innerText || "No name";
-                    const description = card.querySelector(".Card__content")?.innerText || "No description";
-                    return { name, description };
-                });
+                return Array.from(document.querySelectorAll(".geo-places .CardWrapper")).map(card => ({
+                    name: card.querySelector(".Card__heading span")?.textContent.trim() || "No name",
+                    description: card.querySelector(".Card__content")?.textContent.trim() || "No description"
+                }));
             });
 
             allCards = allCards.concat(cards);
