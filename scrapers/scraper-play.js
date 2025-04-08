@@ -19,11 +19,16 @@ const filePath = path.join(cacheDirectory, fileName);
     const startTime = performance.now();
 
     try {
+        if (fs.existsSync(filePath)) {
+            console.log(fs.readFileSync(filePath, "utf-8"));
+            return;
+        }
+
         if (!fs.existsSync(cacheDirectory)) {
             fs.mkdirSync(cacheDirectory, { recursive: true });
         }
 
-        const browser = await chromium.launch({ headless: false });
+        const browser = await chromium.launch({ headless: true });
         const page = await browser.newPage();
 
         const url = `https://www.atlasobscura.com/things-to-do/${formatCity}-${formatCountry}/places`;
@@ -40,10 +45,10 @@ const filePath = path.join(cacheDirectory, fileName);
         let allCards = [];
         let currentPage = 1;
 
-        while (allCards.length < 100) {
+        while (allCards.length < 50) {
             await page.waitForSelector(".geo-places .CardWrapper", { timeout: 10000 });
 
-            const cards = await page.locator(".geo-places .CardWrapper").evaluateAll(cardElements => {
+            const cards = await page.$$eval(".geo-places .CardWrapper", cardElements => {
                 return cardElements.map(card => ({
                     name: card.querySelector('.Card__heading span')?.innerText,
                     description: card.querySelector('.Card__content')?.innerText
@@ -52,24 +57,22 @@ const filePath = path.join(cacheDirectory, fileName);
 
             allCards = [...allCards, ...cards];
 
-            if (allCards.length >= 100) break;
+            if (allCards.length >= 50) {
+                break
+            }
 
             const nextPageUrl = `https://www.atlasobscura.com/things-to-do/${formatCity}-${formatCountry}/places?page=${++currentPage}`;
             await page.goto(nextPageUrl, { waitUntil: "domcontentloaded" });
 
             if (await page.locator(".col-xs-12 .icon-atlas-icon + h2.title-lg").isVisible()) {
-                console.log("Error detected on this page. Stopping further scraping.");
                 break;
             }
         }
 
-        allCards = allCards.slice(0, 100);
+        allCards = allCards.slice(0, 50);
 
         fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
-        console.log("Data saved.");
-
         await browser.close();
-        console.log("Browser closed.");
 
         console.log(`Total time: ${((performance.now() - startTime) / 1000).toFixed(2)} seconds`);
         console.log("CPU Usage: ", process.cpuUsage());
