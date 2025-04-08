@@ -14,7 +14,6 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
 
 (async () => {
     if (fs.existsSync(cachePath)) {
-        console.log("Using cached data.");
         console.log(fs.readFileSync(cachePath, "utf-8"));
         return;
     }
@@ -31,38 +30,26 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
         const page = await browser.newPage();
         await page.setViewport({ width: 800, height: 600 });
         await page.setRequestInterception(true);
-        page.on("request", (req) => {
+
+        page.on("request", (request) => {
             const blockedResources = ["image", "stylesheet", "font", "media", "other"];
-            if (blockedResources.includes(req.resourceType())) {
-                req.abort();
+            if (blockedResources.includes(request.resourceType())) {
+                request.abort();
             } else {
-                req.continue();
+                request.continue();
             }
         });
 
-
-
         const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
         await page.goto(url);
-        console.log("Navigated to URL.");
-
-        const errorExists = await page.evaluate(() => {
-            const errorElement = document.querySelector('.col-xs-12 .icon-atlas-icon + h2.title-lg');
-            return errorElement && errorElement.innerText.includes("Something went wrong on our end.");
-        });
-
-        if (errorExists) {
-            await browser.close();
-            return;
-        }
 
         await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 }).then(async () => {
             await page.click("#onetrust-accept-btn-handler");
-        }).catch(() => console.log("No Accept Cookies button found."));
+        })
 
         await page.waitForSelector(".fc-button.fc-cta-consent.fc-primary-button", { timeout: 10000 }).then(async () => {
             await page.click(".fc-button.fc-cta-consent.fc-primary-button");
-        }).catch(() => console.log("No Consent button found."));
+        })
 
         let allCards = [];
         let currentPage = 1;
@@ -72,21 +59,20 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
 
             const cards = await page.evaluate(() => {
                 return Array.from(document.querySelectorAll(".geo-places .CardWrapper")).map(card => ({
-                    name: card.querySelector(".Card__heading span")?.textContent.trim() || "No name",
-                    description: card.querySelector(".Card__content")?.textContent.trim() || "No description"
+                    name: card.querySelector(".Card__heading span")?.textContent.trim(),
+                    description: card.querySelector(".Card__content")?.textContent.trim()
                 }));
             });
 
             allCards = allCards.concat(cards);
 
-            if (allCards.length >= 100) {
+            if (allCards.length >= 50) {
                 break;
             }
 
             currentPage++;
             const nextPageUrl = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places?page=${currentPage}`;
             await page.goto(nextPageUrl);
-            console.log("Navigated to the next page.");
 
             const nextPageError = await page.evaluate(() => {
                 const errorElement = document.querySelector(".col-xs-12 .icon-atlas-icon + h2.title-lg");
@@ -94,18 +80,13 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             });
 
             if (nextPageError) {
-                console.log("Error detected on this page. Stopping further scraping.");
                 break;
             }
         }
 
-        allCards = allCards.slice(0, 100);
-
-        const filePath = path.join(__dirname, "atlas_data.json");
-        fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
+        allCards = allCards.slice(0, 50);
 
         fs.writeFileSync(cachePath, JSON.stringify(allCards, null, 2));
-        console.log("Cache saved.");
 
         await browser.close();
 
