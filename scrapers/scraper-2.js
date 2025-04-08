@@ -17,20 +17,28 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
     const startCPU = process.cpuUsage();
 
     try {
-        const cacheDir = path.join(__dirname, "cache");
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
+        if (fs.existsSync(cachePath)) {
+            console.log(fs.readFileSync(cachePath, "utf-8"));
+            return;
         }
 
-        const browser = await puppeteer.launch({ headless: false });
+        const browser = await puppeteer.launch({ headless: "true" });
         const page = await browser.newPage();
 
         const url = `https://en.wikivoyage.org/wiki/${city.replace(' ', '_')}`;
+
+        await page.setRequestInterception(true);
+        page.on("request", (request) => {
+            const blockedResources = ["image", "stylesheet", "font", "media", "other"];
+            if (blockedResources.includes(request.resourceType())) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+
         await page.goto(url);
-        console.log("Navigated to URL.");
-
         await page.waitForSelector("#mw-content-text", { timeout: 10000 });
-
         const sections = ["Understand", "Get Around", "See", "Do", "Buy", "Eat", "Drink"];
 
         const data = await page.evaluate((sections) => {
@@ -65,18 +73,13 @@ const cachePath = path.join(__dirname, "cache", cacheFile);
             return sectionData;
         }, sections);
 
-        const filePath = path.join(__dirname, "wikivoyage_data.json");
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-
         fs.writeFileSync(cachePath, JSON.stringify(data, null, 2));
-        console.log("Cache saved.");
-
         await browser.close();
 
         const endTime = performance.now();
         const endCPU = process.cpuUsage(startCPU);
-        const totalTime = (endTime - startTime) / 1000; // in seconds
-        const cpuUsage = (endCPU.user + endCPU.system) / 1000000; // in seconds
+        const totalTime = (endTime - startTime) / 1000;
+        const cpuUsage = (endCPU.user + endCPU.system) / 1000000;
 
         console.log(`Total time: ${totalTime.toFixed(2)} seconds.`);
         console.log(`CPU usage: ${cpuUsage.toFixed(2)}%.`);
