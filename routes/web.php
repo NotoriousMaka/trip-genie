@@ -9,9 +9,11 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::post('/trips', [TripController::class, 'store'])->name('trips.store');
-Route::get('/trip/plan', [TripController::class, 'showTripPlan'])->name('trip.plan');
-Route::post('/create-plan', [TripController::class, 'store'])->name('create-plan');
+Route::middleware('auth')->group(function () {
+    Route::post('/trips', [TripController::class, 'store'])->name('trips.store');
+    Route::get('/trip/plan', [TripController::class, 'showTripPlan'])->name('trip.plan');
+    Route::post('/create-plan', [TripController::class, 'store'])->name('create-plan');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -30,6 +32,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
-})->name('logout');
+})->middleware('auth')->name('logout');
+
 
 require __DIR__.'/auth.php';
