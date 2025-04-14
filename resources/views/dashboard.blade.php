@@ -173,4 +173,29 @@
     </section>
 </main>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        startDateInput.setAttribute('min', today);
+        endDateInput.setAttribute('min', today);
+
+        function validateDates() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+
+            if (startDate.getFullYear() !== endDate.getFullYear()) {
+                alert('Start Date and End Date must be in the same year.');
+                endDateInput.value = '';
+            }
+        }
+
+        startDateInput.addEventListener('change', validateDates);
+        endDateInput.addEventListener('change', validateDates);
+    });
+</script>
+
 </html>
