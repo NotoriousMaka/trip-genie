@@ -179,22 +179,35 @@
         const today = new Date().toISOString().split('T')[0];
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
+        const form = document.querySelector('form');
 
         startDateInput.setAttribute('min', today);
         endDateInput.setAttribute('min', today);
 
-        function validateDates() {
+        form.addEventListener('submit', function (event) {
             const startDate = new Date(startDateInput.value);
             const endDate = new Date(endDateInput.value);
 
-            if (startDate.getFullYear() !== endDate.getFullYear()) {
-                alert('Start Date and End Date must be in the same year.');
-                endDateInput.value = '';
+            if (startDateInput.value.length === 10 && endDateInput.value.length === 10) {
+                if (startDate.getFullYear() === endDate.getFullYear()) {
+                    if (startDate.getMonth() > endDate.getMonth()) {
+                        alert('The start date must be before the end date.');
+                        endDateInput.value = '';
+                        event.preventDefault();
+                    } else {
+                        if (startDate.getDate() > endDate.getDate()) {
+                            alert('The start date must be before the end date.');
+                            endDateInput.value = '';
+                            event.preventDefault();
+                        }
+                    }
+                } else {
+                    alert('The start year must be before the end year.');
+                    endDateInput.value = '';
+                    event.preventDefault();
+                }
             }
-        }
-
-        startDateInput.addEventListener('change', validateDates);
-        endDateInput.addEventListener('change', validateDates);
+        });
     });
 </script>
 
