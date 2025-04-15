@@ -26,15 +26,24 @@ const filePath = path.join(cacheDirectory, fileName);
         const browser = await chromium.launch({ headless: true });
         const page = await browser.newPage();
 
-        const url = `https://www.lonelyplanet.com/${country.toLowerCase()}/${city.toLowerCase()}/attractions`;
-        await page.goto(url, { waitUntil: "networkidle" });
+        const searchUrl = `https://www.lonelyplanet.com/search?q=${encodeURIComponent(city)}`;
+        await page.goto(searchUrl, { waitUntil: "networkidle" });
 
         try {
             await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 });
             await page.click("#onetrust-accept-btn-handler");
-            console.log("Cookie consent accepted.");
         } catch (error) {
-            console.log("No cookie consent dialog found or could not interact with it.");
+            console.log("Cookie consent button not found or already accepted.");
+        }
+
+        try {
+            const linkSelector = 'a.lg\\:text-lg.text-black.hover\\:text-black.font-semibold.card-link.mb-1.line-clamp-4';
+            await page.waitForSelector(linkSelector, { timeout: 10000 });
+
+            const firstLink = await page.locator(linkSelector).first();
+            await firstLink.click();
+        } catch (error) {
+            console.error("Error clicking the <a> element.");
         }
 
         await page.waitForSelector("a.card-link.line-clamp-2");
@@ -47,43 +56,42 @@ const filePath = path.join(cacheDirectory, fileName);
             const link = links[i];
 
             await page.goto(link, { waitUntil: "networkidle" });
-            console.log("Navigated to attraction.");
 
             const readMoreButton = await page.$("button.text-blue.font-semibold.mt-2.block.mx-auto");
             if (readMoreButton) {
                 await readMoreButton.click();
-                console.log("Clicked the \"Read more\" button.");
             } else {
-                console.log("No \"Read more\" button found.");
+                console.log("No Read more button found.");
             }
 
-            await page.waitForSelector(".readMore_content__bv7mp", { timeout: 5000 });
+            try {
+                await page.waitForSelector(".readMore_content__bv7mp", { timeout: 5000 });
+                const paragraphs = await page.$$eval(".readMore_content__bv7mp p", (elements) => elements.map(el => el.innerText));
 
-            const paragraphs = await page.$$eval(".readMore_content__bv7mp p", (elements) => elements.map(el => el.innerText));
+                const addressElement = await page.$("a[href^=\"https://www.google.com/maps?q=\"]");
+                const address = addressElement ? await page.evaluate(el => el.href, addressElement) : null;
 
-            const addressElement = await page.$("a[href^=\"https://www.google.com/maps?q=\"]");
-            const address = addressElement ? await page.evaluate(el => el.href, addressElement) : null;
+                const phoneElement = await page.$('a[href^="tel:"]');
+                const phone = phoneElement ? await page.evaluate(el => el.innerText, phoneElement) : null;
 
-            const phoneElement = await page.$('a[href^="tel:"]');
-            const phone = phoneElement ? await page.evaluate(el => el.innerText, phoneElement) : null;
+                attractionData.push({
+                    link: link,
+                    paragraphs: paragraphs,
+                    address: address,
+                    phone: phone
+                });
+            } catch (error) {
+                console.log("Error processing attraction.");
 
-            attractionData.push({
-                link: link,
-                paragraphs: paragraphs,
-                address: address,
-                phone: phone
-            });
+            }
         }
 
         fs.writeFileSync(filePath, JSON.stringify(attractionData, null, 2));
-        console.log("Cache saved.");
-
         await browser.close();
-        console.log("Browser closed.");
 
         const endTime = performance.now();
-        const elapsedTime = (endTime - startTime) / 1000;
-        console.log(`Total time: ${elapsedTime.toFixed(2)} seconds`);
+        const totalTime = (endTime - startTime) / 1000;
+        console.log(`Total time: ${totalTime.toFixed(2)} seconds`);
         console.log("CPU usage: ", process.cpuUsage());
     } catch (error) {
         console.error('Error:', error);
