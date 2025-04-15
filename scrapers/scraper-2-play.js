@@ -1,75 +1,121 @@
-import { chromium } from "playwright";
+import {chromium} from "playwright";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const directory = path.dirname(filename);
 
-const city = process.argv[2];
-const country = process.argv[3];
+const city_name = process.argv[2];
+const country_name = process.argv[3];
 
-const formatCity = city.toLowerCase().replace(/\s+/g, '-');
-const formatCountry = country.toLowerCase().replace(/\s+/g, '-');
-const fileName = `${formatCity}-${formatCountry}-wikivoyage.json`;
-const cacheDirectory = path.join(__dirname, "cache-play");
-const filePath = path.join(cacheDirectory, fileName);
+const city_formatted = city_name.toLowerCase().replace(/\s+/g, "-");
+const country_formatted = country_name.toLowerCase().replace(/\s+/g, "-");
+const cache_name = `${city_formatted}-${country_formatted}-wikivoyage.json`;
+const cache_path = path.join(directory, "cache-play", cache_name);
 
-(async () => {
-    const startTime = performance.now();
+function startPerformance() {
+    return { startTime: performance.now(), startCPU: process.cpuUsage() };
+}
+
+function checkCache() {
+    if (fs.existsSync(cache_path)) {
+        const cache = fs.readFileSync(cache_path, "utf-8");
+        return JSON.parse(cache);
+    }
+
+    const cacheDir = path.dirname(cache_path);
+    if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+    }
+
+    return null;
+}
+
+async function setBrowser() {
+    const browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    return { browser, page };
+}
+
+async function navigateAndScrape(page, city_name) {
+    const city_formatted = city_name.replace(/\s+/g, "_");
+    const url = `https://en.wikivoyage.org/wiki/${city_formatted}`;
+
+    await page.goto(url, { waitUntil: "domcontentloaded" });
+    console.log(`Navigated to: ${url}`);
+
+    await page.waitForSelector("#mw-content-text", { timeout: 10000 });
+
+    const sections = ["Understand", "Get Around", "See", "Do", "Buy", "Eat", "Drink"];
+
+    return await page.evaluate((sections) => {
+        const div = document.querySelector("#mw-content-text");
+        const elements = div.querySelectorAll("h2, h3, p, ul");
+
+        let attraction_data = {};
+        let current_section = null;
+
+        elements.forEach((element) => {
+            if (element.tagName === "H2" || element.tagName === "H3") {
+                const section = element.innerText.trim();
+                if (sections.includes(section)) {
+                    current_section = section;
+                    attraction_data[current_section] = [];
+                } else {
+                    current_section = null;
+                }
+            } else if ((element.tagName === "P" || element.tagName === "UL") && current_section) {
+                if (element.tagName === "UL") {
+                    const listItems = Array.from(element.querySelectorAll("li")).map((item) =>
+                        item.innerText.trim()
+                    );
+                    attraction_data[current_section].push(...listItems);
+                } else {
+                    attraction_data[current_section].push(element.innerText.trim());
+                }
+            }
+        });
+
+        return attraction_data;
+    }, sections);
+}
+
+async function saveCache(data) {
+    fs.writeFileSync(cache_path, JSON.stringify(data, null, 2));
+}
+
+function printPerformance(track) {
+    const endTime = performance.now();
+    const endCPU = process.cpuUsage(track.startCPU);
+    const totalTime = (endTime - track.startTime) / 1000;
+    const totalCPU = (endCPU.user + endCPU.system) / 1000000;
+
+    console.log("Total Time Taken (s):", totalTime);
+    console.log("Total CPU Usage (%):", totalCPU);
+}
+
+async function main(city_name) {
+    const cache = checkCache();
+    const track = startPerformance();
+
+    if (cache) {
+        console.log(cache);
+        return;
+    }
 
     try {
-        if (!fs.existsSync(cacheDirectory)) {
-            fs.mkdirSync(cacheDirectory, { recursive: true });
-        }
-
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
-
-        const url = `https://en.wikivoyage.org/wiki/${city.replace(/\s+/g, '_')}`;
-        await page.goto(url, { waitUntil: "domcontentloaded" });
-        console.log("Navigated to URL.");
-
-        await page.waitForSelector("#mw-content-text", { timeout: 10000 });
-
-        const sections = ["Understand", "Get Around", "See", "Do", "Buy", "Eat", "Drink"];
-
-        const data = await page.evaluate((sections) => {
-            const contentDiv = document.querySelector("#mw-content-text");
-            const sectionElements = contentDiv.querySelectorAll("h2, h3, p, ul");
-
-            let sectionData = {};
-            let currentSection = null;
-
-            sectionElements.forEach(element => {
-                if (element.tagName === "H2" || element.tagName === "H3") {
-                    const sectionName = element.innerText.trim();
-                    if (sections.includes(sectionName)) {
-                        currentSection = sectionName;
-                        sectionData[currentSection] = [];
-                    } else {
-                        currentSection = null;
-                    }
-                } else if ((element.tagName === "P" || element.tagName === "UL") && currentSection) {
-                    if (element.tagName === "UL") {
-                        const listItems = Array.from(element.querySelectorAll("li")).map(item => item.innerText.trim());
-                        sectionData[currentSection].push(...listItems);
-                    } else {
-                        sectionData[currentSection].push(element.innerText.trim());
-                    }
-                }
-            });
-
-            return sectionData;
-        }, sections);
-
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        console.log("Data saved.");
-
+        const { browser, page } = await setBrowser();
+        const data = await navigateAndScrape(page, city_name);
+        await saveCache(data);
         await browser.close();
-        console.log(`Total time: ${((performance.now() - startTime) / 1000).toFixed(2)} seconds.`);
-        console.log("CPU usage: ", process.cpuUsage());
+        printPerformance(track);
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Scraping failed:", error);
     }
+}
+
+(async () => {
+    await main(city_name, country_name);
 })();
