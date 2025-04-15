@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use OpenAI;
 use Illuminate\Support\Facades\File;
@@ -23,124 +24,121 @@ class TripController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $cityCountry = strtolower($city) . '-' . strtolower($country);
-        $atlasCache = base_path("scrapers/cache/{$cityCountry}-atlas.json");
-        $wikiCache = base_path("scrapers/cache/{$cityCountry}-wikivoyage.json");
-        $lonelyPlanetCache = base_path("scrapers/cache/{$cityCountry}-lonelyplanet.json");
-        $yelpCache = base_path("scrapers/cache/{$cityCountry}-yelp.json");
+        $combined_location = strtolower($city) . '-' . strtolower($country);
+        $atlasCache = base_path("scrapers/cache/{$combined_location}-atlas.json");
+        $wikiCache = base_path("scrapers/cache/{$combined_location}-wikivoyage.json");
+        $lonelyPlanetCache = base_path("scrapers/cache/{$combined_location}-lonelyplanet.json");
+        $yelpCache = base_path("scrapers/cache-play/{$combined_location}-yelp.json");
 
-        $atlasDataPath = base_path('scrapers/atlas-data.json');
-        $wikiDataPath = base_path('scrapers/wikivoyage_data.json');
-        $lonelyPlanetDataPath = base_path('scrapers/lonelyplanet_data.json');
-        $yelpDataPath = base_path('scrapers/yelp_data.json');
+        $atlas_path = base_path('scrapers/atlas-data.json');
+        $wiki_path = base_path('scrapers/wikivoyage_data.json');
+        $lonely_path = base_path('scrapers/lonelyplanet_data.json');
+        $yelp_path = base_path('scrapers/yelp_data.json');
 
-        $runAtlasScraper = true;
+        $run_atlas = true;
         if (File::exists($atlasCache)) {
-            File::copy($atlasCache, $atlasDataPath);
-            $runAtlasScraper = false;
+            File::copy($atlasCache, $atlas_path);
+            $run_atlas = false;
         }
 
-        $runWikiScraper = true;
+        $run_wiki = true;
         if (File::exists($wikiCache)) {
-            File::copy($wikiCache, $wikiDataPath);
-            $runWikiScraper = false;
+            File::copy($wikiCache, $wiki_path);
+            $run_wiki = false;
         }
 
-        $runLonelyPlanetScraper = true;
+        $run_lonely = true;
         if (File::exists($lonelyPlanetCache)) {
-            File::copy($lonelyPlanetCache, $lonelyPlanetDataPath);
-            $runLonelyPlanetScraper = false;
+            File::copy($lonelyPlanetCache, $lonely_path);
+            $run_lonely = false;
         }
 
-        $runYelpScraper = true;
+        $run_yelp = true;
         if (File::exists($yelpCache)) {
-            File::copy($yelpCache, $yelpDataPath);
-            $runYelpScraper = false;
+            File::copy($yelpCache, $yelp_path);
+            $run_yelp = false;
         }
 
-        $cityArg = escapeshellarg($city);
-        $countryArg = escapeshellarg($country);
+        $city_argument = escapeshellarg($city);
+        $country_argument = escapeshellarg($country);
 
-        if ($runAtlasScraper) {
-            exec("cd " . base_path() . " && node scrapers/scraper.js {$cityArg} {$countryArg}", $output1, $return_var1);
+        if ($run_atlas) {
+            exec("cd " . base_path() . " && node scrapers/scraper.js {$city_argument} {$country_argument}", $output1, $return_var1);
         }
 
-        if ($runWikiScraper) {
-            exec("cd " . base_path() . " && node scrapers/scraper-2.js {$cityArg} {$countryArg}", $output2, $return_var2);
+        if ($run_wiki) {
+            exec("cd " . base_path() . " && node scrapers/scraper-2.js {$city_argument} {$country_argument}", $output2, $return_var2);
         }
 
-        if ($runLonelyPlanetScraper) {
-            exec("cd " . base_path() . " && node scrapers/scraper-3.js {$cityArg} {$countryArg}", $output3, $return_var3);
+        if ($run_lonely) {
+            exec("cd " . base_path() . " && node scrapers/scraper-3.js {$city_argument} {$country_argument}", $output3, $return_var3);
         }
 
-        if ($runYelpScraper) {
-            exec("cd " . base_path() . " && node scrapers/scraper-4.js {$cityArg} {$countryArg}", $output4, $return_var4);
+        if ($run_yelp) {
+            exec("cd " . base_path() . " && node scrapers/scraper-4-play.js {$city_argument} {$country_argument}", $output4, $return_var4);
         }
 
-        $apiKey = env('OPENAI_API_KEY');
-        if (!$apiKey) {
-            return response()->json(['error' => 'OpenAI API key is not set'], 500);
-        }
-        $client = OpenAI::client($apiKey);
+        $api = env('OPENAI_API_KEY');
+        $client = OpenAI::client($api);
 
-        if (!File::exists($atlasDataPath) || !File::exists($wikiDataPath) || !File::exists($lonelyPlanetDataPath) || !File::exists($yelpDataPath)) {
+        if (!File::exists($atlas_path) || !File::exists($wiki_path) || !File::exists($lonely_path) || !File::exists($yelp_path)) {
             return response()->json(['error' => 'Scraped data files do not exist'], 500);
         }
 
-        $selectedCards = json_decode(File::get($atlasDataPath), true);
-        $wikiData = json_decode(File::get($wikiDataPath), true);
-        $lonelyPlanetData = json_decode(File::get($lonelyPlanetDataPath), true);
-        $yelpData = json_decode(File::get($yelpDataPath), true);
+        $atlas_data = json_decode(File::get($atlas_path), true);
+        $wikiData = json_decode(File::get($wiki_path), true);
+        $lonely_data = json_decode(File::get($lonely_path), true);
+        $yelp_data = json_decode(File::get($yelp_path), true);
 
-        $cardsContent = "";
-        foreach ($selectedCards as $card) {
+        $cards = "";
+        foreach ($atlas_data as $card) {
             $timeSpent = isset($card['time_spent']) ? "{$card['time_spent']} minutes" : "Time not specified";
-            $cardsContent .= "{$card['name']}\nDescription: {$card['description']}\nDuration: $timeSpent\n\n";
+            $cards .= "{$card['name']}\nDescription: {$card['description']}\nDuration: $timeSpent\n\n";
         }
 
-        $wikiContent = "";
+        $wiki_ifnromation = "";
         foreach ($wikiData as $section => $items) {
-            $wikiContent .= "--- {$section} ---\n";
+            $wiki_ifnromation .= "--- {$section} ---\n";
             foreach ($items as $item) {
-                $wikiContent .= "• {$item}\n";
+                $wiki_ifnromation .= "• {$item}\n";
             }
-            $wikiContent .= "\n";
+            $wiki_ifnromation .= "\n";
         }
 
-        $lonelyPlanetContent = "";
-        foreach ($lonelyPlanetData as $place) {
+        $lonely_information = "";
+        foreach ($lonely_data as $place) {
             $name = $place['name'] ?? 'Unknown Name';
             $description = $place['description'] ?? 'No description available';
-            $lonelyPlanetContent .= "{$name}\nDescription: {$description}\n\n";
+            $lonely_information .= "{$name}\nDescription: {$description}\n\n";
         }
 
-        $yelpContent = "";
-        if (isset($yelpData['restaurants'])) {
-            foreach ($yelpData['restaurants'] as $restaurant) {
+        $yelp_information = "";
+        if (isset($yelp_data['restaurants'])) {
+            foreach ($yelp_data['restaurants'] as $restaurant) {
                 $name = $restaurant['name'] ?? 'Unknown Restaurant';
                 $rating = $restaurant['rating'] ?? 'No rating available';
                 $location = $restaurant['location'] ?? 'No location available';
-                $yelpContent .= "{$name}\nRating: {$rating}\nLocation: {$location}\n\n";
+                $yelp_information .= "{$name}\nRating: {$rating}\nLocation: {$location}\n\n";
             }
         }
 
-        $startDateObj = \Carbon\Carbon::parse($startDate);
-        $endDateObj = \Carbon\Carbon::parse($endDate);
-        $dateRange = $startDateObj->diffInDays($endDateObj) + 1;
+        $start_date = Carbon::parse($startDate);
+        $end_date = Carbon::parse($endDate);
+        $date_range = $start_date->diffInDays($end_date) + 1;
 
         $travelPlan = '';
-        $dayCounter = 1;
-        for ($i = 0; $i < $dateRange; $i++) {
-            $currentDate = $startDateObj->addDays($i)->format('Y-m-d');
+        $day_number = 1;
+        for ($i = 0; $i < $date_range; $i++) {
+            $today = $start_date->addDays($i)->format('Y-m-d');
 
             $response = $client->chat()->create([
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
                     ['role' => 'system', 'content' => 'You are a travel assistant that creates structured, engaging itineraries with full-day activities, walking times, and meal breaks.'],
-                    ['role' => 'user', 'content' => "Create a detailed itinerary for $city, $country on $currentDate.
+                    ['role' => 'user', 'content' => "Create a detailed itinerary for $city, $country on $today.
                     Format it as follows:
 
-                    Day {$dayCounter}:
+                    Day {$day_number}:
                     - 9:00 AM - Activity Name
                     - 11:00 AM - Activity Name
                     - 1:00 PM - Lunch Break
@@ -153,10 +151,10 @@ class TripController extends Controller
 
                     For the lunch break and dinner, suggest a restaurant from the Yelp data.
                     Use the following data:
-                    $cardsContent
-                    $wikiContent
-                    $lonelyPlanetContent
-                    $yelpContent
+                    $cards
+                    $wiki_ifnromation
+                    $lonely_information
+                    $yelp_information
                     "],
                 ],
                 'max_tokens' => 4096,
@@ -164,11 +162,11 @@ class TripController extends Controller
 
             $dayPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated for this day.';
             $travelPlan .= "\n\n$dayPlan";
-            $dayCounter++;
+            $day_number++;
         }
 
         $locations = [];
-        foreach ($selectedCards as $card) {
+        foreach ($atlas_data as $card) {
             $locations[] = [
                 'name' => $card['name'],
                 'description' => $card['description']
@@ -184,7 +182,7 @@ class TripController extends Controller
             }
         }
 
-        foreach ($lonelyPlanetData as $place) {
+        foreach ($lonely_data as $place) {
             $name = $place['name'] ?? 'Unknown Name';
             $description = $place['description'] ?? 'No description available';
             $locations[] = [
@@ -193,7 +191,7 @@ class TripController extends Controller
             ];
         }
 
-        foreach ($yelpData as $restaurant) {
+        foreach ($yelp_data as $restaurant) {
             $name = $restaurant['name'] ?? 'Unknown Restaurant';
             $rating = $restaurant['rating'] ?? 'No rating available';
             $location = $restaurant['location'] ?? 'No location available';

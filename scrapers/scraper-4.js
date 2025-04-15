@@ -39,7 +39,7 @@ async function setBrowser() {
 
 async function navigateAndScrape(page, city_name, country_name) {
     let startIndex = 0;
-    let allRestaurants = [];
+    let total_restaurants = [];
     let maxPages = 5;
 
     for (let i = 0; i < maxPages; i++) {
@@ -72,12 +72,11 @@ async function navigateAndScrape(page, city_name, country_name) {
             }).filter(Boolean);
         });
 
-        allRestaurants = allRestaurants.concat(restaurants);
-        console.log(allRestaurants);
+        total_restaurants = total_restaurants.concat(restaurants);
         startIndex += 10;
     }
 
-    return allRestaurants;
+    return total_restaurants;
 }
 
 async function saveCache(data) {
