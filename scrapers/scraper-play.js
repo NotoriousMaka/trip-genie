@@ -3,80 +3,116 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const directory = path.dirname(filename);
 
-const city = process.argv[2];
-const country = process.argv[3];
+const city_name = process.argv[2];
+const country_name = process.argv[3];
 
-const formatCity = city.toLowerCase().replace(/\s+/g, "-");
-const formatCountry = country.toLowerCase().replace(/\s+/g, "-");
-const fileName = `${formatCity}-${formatCountry}-atlas.json`;
-const cacheDirectory = path.join(__dirname, "cache-play");
-const filePath = path.join(cacheDirectory, fileName);
+const formatCity = city_name.toLowerCase().replace(/\s+/g, "-");
+const formatCountry = country_name.toLowerCase().replace(/\s+/g, "-");
+const cache_name = `${formatCity}-${formatCountry}-atlas.json`;
+const cache_path = path.join(directory, "cache-play", cache_name);
 
-(async () => {
-    const startTime = performance.now();
+function startPerformance() {
+    return { startTime: performance.now(), startCPU: process.cpuUsage() };
+}
 
-    try {
-        if (fs.existsSync(filePath)) {
-            console.log(fs.readFileSync(filePath, "utf-8"));
-            return;
-        }
+function checkCache() {
+    if (fs.existsSync(cache_path)) {
+        const cache = fs.readFileSync(cache_path, "utf-8");
+        return JSON.parse(cache);
+    }
 
-        if (!fs.existsSync(cacheDirectory)) {
-            fs.mkdirSync(cacheDirectory, { recursive: true });
-        }
+    const directory = path.dirname(cache_path);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
 
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
+    return null;
+}
 
-        const url = `https://www.atlasobscura.com/things-to-do/${formatCity}-${formatCountry}/places`;
+async function setBrowser() {
+    const browser = await chromium.launch({ headless: false });
+    const page = await browser.newPage();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    return { browser, page };
+}
+
+async function navigateAndScrape(page, city_name, country_name, results = 50) {
+    const main_url = `https://www.atlasobscura.com/things-to-do/${formatCity}-${formatCountry}/places`;
+    let current_page = 1;
+    let total_cards = [];
+
+    while (total_cards.length < results) {
+        const url = current_page === 1 ? main_url : `${main_url}?page=${current_page}`;
         await page.goto(url, { waitUntil: "domcontentloaded" });
 
-        if (await page.locator("#onetrust-accept-btn-handler").isVisible()) {
-            await page.click("#onetrust-accept-btn-handler");
+        const first_cookie = page.locator("#onetrust-accept-btn-handler");
+        if (await first_cookie.isVisible()) await first_cookie.click();
+
+        const second_cookie = page.locator(".fc-button.fc-cta-consent.fc-primary-button");
+        if (await second_cookie.isVisible()) await second_cookie.click();
+
+        if (await page.locator("text=Something went wrong on our end.").isVisible()) {
+            await page.close();
+            break;
         }
 
-        if (await page.locator(".fc-button.fc-cta-consent.fc-primary-button").isVisible()) {
-            await page.click(".fc-button.fc-cta-consent.fc-primary-button");
-        }
+        await page.waitForSelector(".geo-places .CardWrapper", { timeout: 10000 });
 
-        let allCards = [];
-        let currentPage = 1;
+        const cards = await page.$$eval(".geo-places .CardWrapper", (card_elements) =>
+            card_elements.map((card) => ({
+                name: card.querySelector(".Card__heading span")?.innerText || null,
+                description: card.querySelector(".Card__content")?.innerText || null,
+            }))
+        );
 
-        while (allCards.length < 50) {
-            await page.waitForSelector(".geo-places .CardWrapper", { timeout: 10000 });
+        total_cards = [...total_cards, ...cards];
 
-            const cards = await page.$$eval(".geo-places .CardWrapper", cardElements => {
-                return cardElements.map(card => ({
-                    name: card.querySelector('.Card__heading span')?.innerText,
-                    description: card.querySelector('.Card__content')?.innerText
-                }));
-            });
+        console.log(total_cards)
 
-            allCards = [...allCards, ...cards];
-
-            if (allCards.length >= 50) {
-                break
-            }
-
-            const nextPageUrl = `https://www.atlasobscura.com/things-to-do/${formatCity}-${formatCountry}/places?page=${++currentPage}`;
-            await page.goto(nextPageUrl, { waitUntil: "domcontentloaded" });
-
-            if (await page.locator(".col-xs-12 .icon-atlas-icon + h2.title-lg").isVisible()) {
-                break;
-            }
-        }
-
-        allCards = allCards.slice(0, 50);
-
-        fs.writeFileSync(filePath, JSON.stringify(allCards, null, 2));
-        await browser.close();
-
-        console.log(`Total time: ${((performance.now() - startTime) / 1000).toFixed(2)} seconds`);
-        console.log("CPU Usage: ", process.cpuUsage());
-    } catch (error) {
-        console.error("Error:", error);
+        current_page++;
     }
+
+    return total_cards.slice(0, results);
+}
+
+async function saveCache(data) {
+    fs.writeFileSync(cache_path, JSON.stringify(data, null, 2));
+}
+
+function printPerformance(track) {
+    const endTime = performance.now();
+    const endCPU = process.cpuUsage(track.startCPU);
+    const totalTime = (endTime - track.startTime) / 1000;
+    const totalCPU = (endCPU.user + endCPU.system) / 1000000;
+
+    console.log("Total Time Taken (s): ", totalTime);
+    console.log("Total CPU Usage (%): ", totalCPU);
+}
+
+async function main(city_name, country_name) {
+    const cache = checkCache();
+    const track = startPerformance();
+
+    if (cache) {
+        console.log("Using cached data.");
+        console.log(cache);
+        return;
+    }
+
+    try {
+        const { browser, page } = await setBrowser();
+        const data = await navigateAndScrape(page, city_name, country_name);
+        await saveCache(data);
+        await browser.close();
+        printPerformance(track);
+    } catch (error) {
+        console.error("Scraping failed:", error);
+    }
+}
+
+(async () => {
+    await main(city_name, country_name);
 })();
