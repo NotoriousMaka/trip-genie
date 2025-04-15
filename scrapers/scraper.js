@@ -1,103 +1,165 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const directory = path.dirname(filename);
 
-const city = process.argv[2];
-const country = process.argv[3];
+const country_name = process.argv[3];
+const city_name = process.argv[2];
 
-const cacheFile = `${city.toLowerCase()}-${country.toLowerCase()}-atlas.json`;
-const cachePath = path.join(__dirname, "cache", cacheFile);
+const cache_name =  `${city_name.toLowerCase()}-${country_name.toLowerCase()}-atlas.json`;
+const cache_path = path.join(directory, "cache", cache_name);
 
-(async () => {
-    if (fs.existsSync(cachePath)) {
-        console.log(fs.readFileSync(cachePath, "utf-8"));
-        return;
+function startPerformance() {
+    return {startTime: performance.now(), startCPU: process.cpuUsage()}
+}
+
+async function setBrowser() {
+    const browser = await puppeteer.launch({headless: true});
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
+    await page.setRequestInterception(true);
+
+    page.on("request", (request) => {
+        const blockedResources = ["image", "stylesheet", "font", "media", "other"];
+        if (blockedResources.includes(request.resourceType())) {
+            request.abort();
+        } else {
+            request.continue();
+        }
+    });
+
+    return {browser, page};
+}
+
+function checkCache() {
+    if (fs.existsSync(cache_path)) {
+        const cache = fs.readFileSync(cache_path, "utf-8");
+        return JSON.parse(cache);
     }
-    const startTime = performance.now();
-    const startCPU = process.cpuUsage();
+    return null;
+}
+
+async function goToURL(page, city_name, country_name, pageNo = 1){
+    const url = `https://www.atlasobscura.com/things-to-do/${city_name.toLowerCase()}-${country_name.toLowerCase()}/places`;
+    let nextUrl = ``;
+
+    if (pageNo === 1) {
+        nextUrl = url;
+    } else {
+        nextUrl = `${url}?page=${pageNo}`;
+    }
+
+    await page.goto(nextUrl);
+}
+
+async function resolveCookie(page) {
+    try {
+        await page.waitForSelector("#onetrust-accept-btn-handler").then(
+            async () => {
+                await page.click("#onetrust-accept-btn-handler");
+            }
+        );
+
+        await page.waitForSelector(".fc-button.fc-cta-consent.fc-primary-button").then(
+            async () => {
+                await page.click(".fc-button.fc-cta-consent.fc-primary-button");
+            }
+        );
+    } catch (error) {
+        console.log("Cookie not present.");
+    }
+}
+
+async function retrievePlaces(page){
+    await page.waitForSelector(".geo-places .CardWrapper")
+
+    return page.evaluate(() => {
+        return Array.from(document.querySelectorAll(".geo-places .CardWrapper"))
+            .map(card => ({
+                name: card.querySelector(".Card__heading span")?.textContent.trim(),
+                description: card.querySelector(".Card__content")?.textContent.trim()
+            }))
+    })
+}
+
+async function seeError(page) {
+    return page.evaluate(() => {
+        const errorElement = document.querySelector(".col-xs-12 .icon-atlas-icon + h2.title-lg");
+        return errorElement && errorElement.innerText.includes("Something went wrong on our end.");
+    });
+}
+
+async function saveCache(cache_path, data){
+    fs.writeFileSync(cache_path, JSON.stringify(data, null, 2));
+}
+
+function  printPerformance(track) {
+    const endTime = performance.now();
+    const endCPU = process.cpuUsage(track.startCPU);
+
+    const totalTime = (endTime - track.startTime) / 1000;
+    const totalCPU = (endCPU.user + endCPU.system) / 1000000;
+
+    console.log("Total Time Taken (s): ", totalTime)
+    console.log("Total CPU Usage (%): ", totalCPU)
+}
+
+async function main(city_name, country_name, cache_path, cache_name){
+    const cache = checkCache();
+    const track = startPerformance();
+    const {browser, page} = await setBrowser();
+
+    let totalPlaces = [];
+    let currentPage = 1;
+
+    if (cache) {
+        console.log(JSON.stringify(cache, null, 2));
+    }
 
     try {
-        const cacheDir = path.join(__dirname, "cache");
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
+        const cache_directory = path.join(directory, "cache")
+
+        if (!fs.existsSync(cache_directory)) {
+            fs.mkdirSync(cache_directory, { recursive: true });
         }
 
-        const browser = await puppeteer.launch({ headless: "true" });
-        const page = await browser.newPage();
-        await page.setViewport({ width: 800, height: 600 });
-        await page.setRequestInterception(true);
+        await goToURL(page, city_name, country_name);
+        await resolveCookie(page);
 
-        page.on("request", (request) => {
-            const blockedResources = ["image", "stylesheet", "font", "media", "other"];
-            if (blockedResources.includes(request.resourceType())) {
-                request.abort();
-            } else {
-                request.continue();
-            }
-        });
+        while (totalPlaces.length < 50) {
+            const places = await retrievePlaces(page);
+            totalPlaces = totalPlaces.concat(places);
 
-        const url = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places`;
-        await page.goto(url);
-
-        await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 }).then(async () => {
-            await page.click("#onetrust-accept-btn-handler");
-        })
-
-        await page.waitForSelector(".fc-button.fc-cta-consent.fc-primary-button", { timeout: 10000 }).then(async () => {
-            await page.click(".fc-button.fc-cta-consent.fc-primary-button");
-        })
-
-        let allCards = [];
-        let currentPage = 1;
-
-        while (allCards.length < 50) {
-            await page.waitForSelector(".geo-places .CardWrapper", { timeout: 5000 });
-
-            const cards = await page.evaluate(() => {
-                return Array.from(document.querySelectorAll(".geo-places .CardWrapper")).map(card => ({
-                    name: card.querySelector(".Card__heading span")?.textContent.trim(),
-                    description: card.querySelector(".Card__content")?.textContent.trim()
-                }));
-            });
-
-            allCards = allCards.concat(cards);
-
-            if (allCards.length >= 50) {
+            if (totalPlaces.length >= 50) {
                 break;
             }
 
             currentPage++;
-            const nextPageUrl = `https://www.atlasobscura.com/things-to-do/${city.toLowerCase()}-${country.toLowerCase()}/places?page=${currentPage}`;
-            await page.goto(nextPageUrl);
+            await goToURL(page, city_name, country_name, currentPage);
 
-            const nextPageError = await page.evaluate(() => {
-                const errorElement = document.querySelector(".col-xs-12 .icon-atlas-icon + h2.title-lg");
-                return errorElement && errorElement.innerText.includes("Something went wrong on our end.");
-            });
-
-            if (nextPageError) {
+            const error = await seeError(page);
+            if (error) {
                 break;
             }
         }
 
-        allCards = allCards.slice(0, 50);
+        totalPlaces = totalPlaces.slice(0, 50);
 
-        fs.writeFileSync(cachePath, JSON.stringify(allCards, null, 2));
+        await saveCache(cache_path, totalPlaces);
 
         await browser.close();
+        printPerformance(track);
 
-        const endTime = performance.now();
-        const endCPU = process.cpuUsage(startCPU);
-        const totalTime = (endTime - startTime) / 1000;
-        const cpuUsage = (endCPU.user + endCPU.system) / 1000000;
-
-        console.log(`Total time: ${totalTime.toFixed(2)} seconds.`);
-        console.log(`CPU usage: ${cpuUsage.toFixed(2)}%.`);
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error in scraping: ", error);
     }
+}
+
+(async () => {
+    await main(city_name, country_name, cache_path, cache_name);
 })();
+
+
