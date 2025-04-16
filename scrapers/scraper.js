@@ -17,7 +17,7 @@ function startPerformance() {
 }
 
 async function setBrowser() {
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
     await page.setRequestInterception(true);

@@ -90,10 +90,10 @@ class TripController extends Controller
         $lonely_data = json_decode(File::get($lonely_path), true);
         $yelp_data = json_decode(File::get($yelp_path), true);
 
-        $cards = "";
+        $atlas_information = "";
         foreach ($atlas_data as $card) {
             $timeSpent = isset($card['time_spent']) ? "{$card['time_spent']} minutes" : "Time not specified";
-            $cards .= "{$card['name']}\nDescription: {$card['description']}\nDuration: $timeSpent\n\n";
+            $atlas_information .= "{$card['name']}\nDescription: {$card['description']}\nDuration: $timeSpent\n\n";
         }
 
         $wiki_ifnromation = "";
@@ -128,39 +128,53 @@ class TripController extends Controller
 
         $travelPlan = '';
         $day_number = 1;
+        $used_activities = [];
         for ($i = 0; $i < $date_range; $i++) {
             $today = $start_date->addDays($i)->format('Y-m-d');
+
+            $previously_used = implode(", ", $used_activities);
 
             $response = $client->chat()->create([
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
                     ['role' => 'system', 'content' => 'You are a travel assistant that creates structured, engaging itineraries with full-day activities, walking times, and meal breaks.'],
                     ['role' => 'user', 'content' => "Create a detailed itinerary for $city, $country on $today.
-                    Format it as follows:
+            Format it as follows:
 
-                    Day {$day_number}:
-                    - 9:00 AM - Activity Name
-                    - 11:00 AM - Activity Name
-                    - 1:00 PM - Lunch Break
-                    - 3:00 PM - Activity Name
-                    - 6:00 PM - Dinner
-                    - 8:00 PM - Evening Activity
+            Day {$day_number}:
+            - 9:00 AM - Activity Name
+            - 11:00 AM - Activity Name
+            - 1:00 PM - Lunch Break
+            - 3:00 PM - Activity Name
+            - 6:00 PM - Dinner
+            - 8:00 PM - Evening Activity
 
-                    I want you to give suggestions from the data I provide.
-                    For each activity, lunch break, and dinner, provide a brief description, the best time to visit, address, and phone number.
+            I want you to give suggestions ONLY from the data I provide.
+            For each activity, lunch break, and dinner, provide a brief description, the best time to visit, address, and phone number.
 
-                    For the lunch break and dinner, suggest a restaurant from the Yelp data.
-                    Use the following data:
-                    $cards
-                    $wiki_ifnromation
-                    $lonely_information
-                    $yelp_information
-                    "],
+            IMPORTANT: DO NOT use any of these previously suggested activities: $previously_used
+            The activities should be completely different from each other and not repeated twice across the itinerary.
+
+            For the lunch break and dinner, suggest a restaurant from the Yelp data.
+            Use the following data:
+            $atlas_information
+            $wiki_ifnromation
+            $lonely_information
+            $yelp_information
+            "],
                 ],
                 'max_tokens' => 4096,
             ]);
 
             $dayPlan = $response['choices'][0]['message']['content'] ?? 'No plan generated for this day.';
+
+            preg_match_all('/- \d+:\d+ [AP]M - (.*?)[\r\n]/', $dayPlan, $matches);
+            if (!empty($matches[1])) {
+                foreach ($matches[1] as $activity) {
+                    $used_activities[] = trim($activity);
+                }
+            }
+
             $travelPlan .= "\n\n$dayPlan";
             $day_number++;
         }
