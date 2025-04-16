@@ -60,7 +60,7 @@
 <div class="logo-container">
     <img src="{{ asset('logos/logo-transparent-white.png') }}" alt="TripGenie Logo">
     <h2 class="text-2xl font-bold">Your Adventure Starts Here</h2>
-    <p class="text-gray-400 mb-4">Discover, plan, and explore with TripGenie!</p>
+    <p class="text-gray-400 mb-4">Plan and explore with TripGenie!</p>
     <button class="explore-btn" onclick="redirectToPage()">Explore Now</button>
 </div>
 </body>

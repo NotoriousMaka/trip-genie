@@ -69,7 +69,7 @@
         <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Your Travel Plan</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Here is your travel plan, carefully crafted for your next adventure.
+                Here is your travel plan, carefully created for your next adventure.
             </p>
         </div>
     </section>

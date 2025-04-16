@@ -104,7 +104,7 @@
         <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Welcome to Your Dashboard</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Manage your trips, view your profile, and adjust your settings all in one place.
+                Manage your trips, view your profile, and adjust your settings here.
             </p>
             <p class="text-lg text-gray-600">Name: {{ Auth::user()->name }}</p>
             <p class="text-lg text-gray-600">Email: {{ Auth::user()->email }}</p>
@@ -115,7 +115,7 @@
         <div class="container px-4 text-center shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h2 class="text-5xl font-extrabold mb-6">Create Your Travel Plan</h2>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-                Discover the world with TripGenie, your trusted AI travel friend.
+                Travel with TripGenie, your trusted AI travel friend.
             </p>
 
             <form action="{{ route('create-plan') }}" method="POST">
