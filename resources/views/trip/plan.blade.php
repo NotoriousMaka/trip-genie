@@ -78,7 +78,7 @@
         <div class="container px-4 shadow-lg rounded-lg p-8 max-w-5xl mx-auto" style="background: #111;">
             <h3 class="text-3xl font-bold mb-6 text-center">Your Customised Itinerary</h3>
             <div class="text-lg text-gray-600">
-                {!! nl2br(e($travelPlan)) !!}
+                {!! nl2br(e($travelPlan)) !!} //!! output raw, unescaped HTML
             </div>
         </div>
     </section>
