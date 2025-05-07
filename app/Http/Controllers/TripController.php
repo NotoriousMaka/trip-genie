@@ -25,65 +25,36 @@ class TripController extends Controller
         $endDate = $request->input('end_date');
 
         $combined_location = strtolower($city) . '-' . strtolower($country);
-        $atlasCache = base_path("scrapers/cache/{$combined_location}-atlas.json");
-        $wikiCache = base_path("scrapers/cache/{$combined_location}-wikivoyage.json");
-        $lonelyPlanetCache = base_path("scrapers/cache/{$combined_location}-lonelyplanet.json");
-        $yelpCache = base_path("scrapers/cache-play/{$combined_location}-yelp.json");
-
-        $atlas_path = base_path('scrapers/atlas-data.json');
-        $wiki_path = base_path('scrapers/wikivoyage_data.json');
-        $lonely_path = base_path('scrapers/lonelyplanet_data.json');
-        $yelp_path = base_path('scrapers/yelp_data.json');
-
-        $run_atlas = true;
-        if (File::exists($atlasCache)) {
-            File::copy($atlasCache, $atlas_path);
-            $run_atlas = false;
-        }
-
-        $run_wiki = true;
-        if (File::exists($wikiCache)) {
-            File::copy($wikiCache, $wiki_path);
-            $run_wiki = false;
-        }
-
-        $run_lonely = true;
-        if (File::exists($lonelyPlanetCache)) {
-            File::copy($lonelyPlanetCache, $lonely_path);
-            $run_lonely = false;
-        }
-
-        $run_yelp = true;
-        if (File::exists($yelpCache)) {
-            File::copy($yelpCache, $yelp_path);
-            $run_yelp = false;
-        }
-
         $city_argument = escapeshellarg($city);
         $country_argument = escapeshellarg($country);
 
-        if ($run_atlas) {
-            exec("cd " . base_path() . " && node scrapers/scraper.js {$city_argument} {$country_argument}", $output1, $return_var1);
+        $atlas_path = base_path("scrapers/cache/{$combined_location}-atlas.json");
+        $wiki_path = base_path("scrapers/cache/{$combined_location}-wikivoyage.json");
+        $lonely_path = base_path("scrapers/cache/{$combined_location}-lonelyplanet.json");
+        $yelp_path = base_path("scrapers/cache-play/{$combined_location}-yelp.json");
+
+        if (!File::exists($atlas_path)) {
+            exec("cd " . base_path() . " && node scrapers/scraper.js {$city_argument} {$country_argument}");
         }
 
-        if ($run_wiki) {
-            exec("cd " . base_path() . " && node scrapers/scraper-2.js {$city_argument} {$country_argument}", $output2, $return_var2);
+        if (!File::exists($wiki_path)) {
+            exec("cd " . base_path() . " && node scrapers/scraper-2.js {$city_argument} {$country_argument}");
         }
 
-        if ($run_lonely) {
-            exec("cd " . base_path() . " && node scrapers/scraper-3.js {$city_argument} {$country_argument}", $output3, $return_var3);
+        if (!File::exists($lonely_path)) {
+            exec("cd " . base_path() . " && node scrapers/scraper-3.js {$city_argument} {$country_argument}");
         }
 
-        if ($run_yelp) {
-            exec("cd " . base_path() . " && node scrapers/scraper-4-play.js {$city_argument} {$country_argument}", $output4, $return_var4);
+        if (!File::exists($yelp_path)) {
+            exec("cd " . base_path() . " && node scrapers/scraper-4-play.js {$city_argument} {$country_argument}");
         }
-
-        $api = env('OPENAI_API_KEY');
-        $client = OpenAI::client($api);
 
         if (!File::exists($atlas_path) || !File::exists($wiki_path) || !File::exists($lonely_path) || !File::exists($yelp_path)) {
             return response()->json(['error' => 'Scraped data files do not exist'], 500);
         }
+
+        $api = env('OPENAI_API_KEY');
+        $client = OpenAI::client($api);
 
         $atlas_data = json_decode(File::get($atlas_path), true);
         $wikiData = json_decode(File::get($wiki_path), true);
