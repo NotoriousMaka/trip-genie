@@ -34,6 +34,20 @@ async function setBrowser() {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
+
+    const errorMessage = await page.evaluate(() => {
+        const errorElement = document.querySelector('.y-css-n2l5h3');
+        return errorElement?.innerText.trim();
+    });
+
+    try {
+        if (errorMessage === "Sorry, but we didn't understand the location you entered.") {
+            throw new Error("Scraping failed: Invalid location.");
+        }
+    } finally {
+        await browser.close();
+    }
+
     return { browser, page };
 }
 
