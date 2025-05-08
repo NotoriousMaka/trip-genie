@@ -31,7 +31,7 @@ class TripController extends Controller
         $atlas_path = base_path("scrapers/cache/{$combined_location}-atlas.json");
         $wiki_path = base_path("scrapers/cache/{$combined_location}-wikivoyage.json");
         $lonely_path = base_path("scrapers/cache/{$combined_location}-lonelyplanet.json");
-        $yelp_path = base_path("scrapers/cache/{$combined_location}-yelp.json");
+        $yelp_path = base_path("scrapers/cache-play/{$combined_location}-yelp.json");
 
         if (!File::exists($atlas_path)) {
             exec("cd " . base_path() . " && node scrapers/scraper.js {$city_argument} {$country_argument}");
@@ -46,7 +46,7 @@ class TripController extends Controller
         }
 
         if (!File::exists($yelp_path)) {
-            exec("cd " . base_path() . " && node scrapers/scraper-4.js {$city_argument} {$country_argument}");
+            exec("cd " . base_path() . " && node scrapers/scraper-4-play.js {$city_argument} {$country_argument}");
         }
 
         if (!File::exists($atlas_path) || !File::exists($wiki_path) || !File::exists($lonely_path) || !File::exists($yelp_path)) {
