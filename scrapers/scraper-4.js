@@ -41,39 +41,49 @@ async function setBrowser() {
 async function navigateAndScrape(page, city_name, country_name) {
     let startIndex = 0;
     let total_restaurants = [];
-    let maxPages = 5;
+    const maxPages = 5;
 
     for (let i = 0; i < maxPages; i++) {
         const url = `https://www.yelp.co.uk/search?find_desc=Restaurants&find_loc=${encodeURIComponent(city_name)},+${encodeURIComponent(country_name)}&start=${startIndex}`;
         await page.goto(url, { waitUntil: "networkidle2" });
 
         try {
-            await page.waitForSelector("#onetrust-accept-btn-handler");
+            await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 });
             await page.click("#onetrust-accept-btn-handler");
-            await page.waitForSelector("ul li");
         } catch (error) {
-            console.log("Button not found or already accepted.");
+            console.log("Cookie consent button not found or already accepted.");
         }
 
-        const restaurants = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll("ul li")).map(restaurant => {
-                const nameElement = restaurant.querySelector('a[class*="y-css-1x1e1r2"]');
-                const ratingElement = restaurant.querySelector('span[class*="y-css-f73en8"]');
-                const locationElement = restaurant.querySelector('span[class*="y-css-yvhxeq"]');
+        try {
+            await page.waitForSelector("ul li", { timeout: 5000 });
+            const restaurants = await page.evaluate(() => {
+                return Array.from(document.querySelectorAll("ul li")).map(restaurant => {
+                    const nameElement = restaurant.querySelector('a[class*="y-css-1x1e1r2"]');
+                    const ratingElement = restaurant.querySelector('span[class*="y-css-f73en8"]');
+                    const locationElement = restaurant.querySelector('span[class*="y-css-yvhxeq"]');
 
-                const name = nameElement?.innerText.trim();
-                const rating = ratingElement?.innerText.trim();
-                const location = locationElement?.innerText.trim();
+                    const name = nameElement?.innerText.trim();
+                    const rating = ratingElement?.innerText.trim();
+                    const location = locationElement?.innerText.trim();
 
-                if (name && rating && location) {
-                    return { name, rating, location };
-                } else {
-                    return null;
-                }
-            }).filter(Boolean);
-        });
+                    if (name && rating && location) {
+                        return { name, rating, location };
+                    } else {
+                        return null;
+                    }
+                }).filter(Boolean);
+            });
 
-        total_restaurants = total_restaurants.concat(restaurants);
+            if (restaurants.length === 0) {
+                break;
+            }
+
+            total_restaurants = total_restaurants.concat(restaurants);
+        } catch (error) {
+            console.error("Error scraping page:", error);
+            break;
+        }
+
         startIndex += 10;
     }
 
