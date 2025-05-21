@@ -76,10 +76,10 @@
         </div>
         <button type="submit" class="btn">Sign In</button>
         <div class="text-center mt-4">
-            <button type="button" class="btn btn-light sign-in_ggl w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200">
-                <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2">
+            <a href="{{ route('google.login') }}" class="btn btn-light w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200 inline-block text-center">
+                <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2 align-middle">
                 Sign in with Google
-            </button>
+            </a>
         </div>
     </form>
     <p class="mt-4">Don't have an account? <a href="register">Register</a></p>

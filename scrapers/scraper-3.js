@@ -65,13 +65,6 @@ async function navigateToSearch(page, city_name) {
     await page.waitForSelector("#onetrust-accept-btn-handler", { timeout: 5000 });
     await page.click("#onetrust-accept-btn-handler");
 
-    await page.waitForSelector("button[popovertarget=\"search-menu-popover\"]", { visible: true, timeout: 10000 });
-    await page.evaluate((selector) => {
-        const btn = document.querySelector(selector);
-        btn.scrollIntoView({behavior: "instant", block: "center"});
-        btn.click();
-    }, "button[popovertarget=\"search-menu-popover\"]");
-
     const searchSelector = "input#searchInputComponent";
     await page.waitForSelector(searchSelector, { visible: true });
     await page.type(searchSelector, city_name);

@@ -88,10 +88,10 @@
         <input id="password_confirmation" type="password" class="input-field" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm Password">
         <button type="submit" class="btn">Register</button>
         <div class="text-center mt-4">
-            <button type="button" class="btn btn-light w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200">
-                <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2">
-                Sign up with Google
-            </button>
+            <a href="{{ route('google.login') }}" class="btn btn-light w-full bg-gray-100 text-gray-700 rounded-lg p-3 hover:bg-gray-200 inline-block text-center">
+                <img src="/logos/google.png" alt="Google" class="inline-block w-5 h-5 mr-2 align-middle">
+                Sign in with Google
+            </a>
         </div>
     </form>
     <p class="mt-4">Already have an account? <a href="{{ route('login') }}">Sign In</a></p>
