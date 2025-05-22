@@ -6,6 +6,8 @@
     <title>TripGenie - AI Travel Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -46,6 +48,13 @@
         .map-container {
             width: 100%;
             height: 500px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -90,5 +99,34 @@
         </div>
     </section>
 </main>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoibm90b3Jpb3VzbWFrYSIsImEiOiJjbWF5bThkNXcwOTBpMmtxdXF4OTgxaHQwIn0.hf_wgqMowPyesvpIS6XtNA';
+
+    const city = @json($city);
+    const country = @json($country);
+
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${city},${country}.json?access_token=${mapboxgl.accessToken}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.features && data.features.length > 0) {
+                const center = data.features[0].center;
+
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/dark-v10',
+                    center: center,
+                    zoom: 11.5
+                });
+
+                new mapboxgl.Marker({ color: '#FFFFFF' })
+                    .setLngLat(center)
+                    .setPopup(new mapboxgl.Popup().setText(`${city}, ${country}`))
+                    .addTo(map);
+            } else {
+                console.error('City not found on Mapbox.');
+            }
+        })
+        .catch(error => console.error('Error fetching geolocation:', error));
+</script>
 </body>
 </html>
