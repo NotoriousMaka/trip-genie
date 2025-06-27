@@ -300,8 +300,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/NotoriousMaka/trip-genie/issues)
 - **Discord**: notoriousmaka
+- **Issues**: [GitHub Issues](https://github.com/NotoriousMaka/trip-genie/issues)
 - **LinkedIn**: [LinkedIn](https://www.linkedin.com/in/alexe-tataru-52bb55208/)
 
 ## 🔮 Future Enhancements
