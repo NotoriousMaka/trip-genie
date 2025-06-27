@@ -1,28 +1,7 @@
 import {chromium} from "playwright";
-import fs from "fs";
-import path from "path";
-import {fileURLToPath} from "url";
-
-const filename = fileURLToPath(import.meta.url);
-const directory = path.dirname(filename);
 
 const country = (process.argv[2]).toLowerCase();
 const city = (process.argv[3]).toLowerCase();
-
-const cache_name = `${country}-${city}-weather.json`;
-const cache_path = path.join(directory, "cache-play", cache_name);
-
-function checkCache() {
-    if (fs.existsSync(cache_path)) {
-        const cache = fs.readFileSync(cache_path, "utf-8");
-        return JSON.parse(cache);
-    }
-    const cacheDir = path.dirname(cache_path);
-    if (!fs.existsSync(cacheDir)) {
-        fs.mkdirSync(cacheDir, { recursive: true });
-    }
-    return null;
-}
 
 async function setBrowser() {
     const browser = await chromium.launch({ headless: false });
@@ -59,20 +38,10 @@ async function navigateAndScrape(page, country, city) {
     });
 }
 
-async function saveCache(data) {
-    fs.writeFileSync(cache_path, JSON.stringify(data, null, 2));
-}
-
 async function main(country, city) {
-    const cache = checkCache();
-    if (cache) {
-        console.log(cache);
-        return;
-    }
     try {
         const { browser, page } = await setBrowser();
         const data = await navigateAndScrape(page, country, city);
-        await saveCache(data);
         await browser.close();
         console.log(data);
     } catch (error) {

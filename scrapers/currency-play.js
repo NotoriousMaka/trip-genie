@@ -1,29 +1,8 @@
 import {chromium} from "playwright";
-import fs from "fs";
-import path from "path";
-import {fileURLToPath} from "url";
-
-const filename = fileURLToPath(import.meta.url);
-const directory = path.dirname(filename);
 
 const from = process.argv[2] || "GBP";
 const to = process.argv[3] || "USD";
 const amount = process.argv[4] || "1";
-
-const cache_name = `${from}-${to}-${amount}-xrates.json`;
-const cache_path = path.join(directory, "cache-play", cache_name);
-
-function checkCache() {
-    if (fs.existsSync(cache_path)) {
-        const cache = fs.readFileSync(cache_path, "utf-8");
-        return JSON.parse(cache);
-    }
-    const cacheDir = path.dirname(cache_path);
-    if (!fs.existsSync(cacheDir)) {
-        fs.mkdirSync(cacheDir, { recursive: true });
-    }
-    return null;
-}
 
 async function setBrowser() {
     const browser = await chromium.launch({ headless: false });
@@ -46,20 +25,10 @@ async function navigateAndScrape(page, from, to, amount) {
     });
 }
 
-async function saveCache(data) {
-    fs.writeFileSync(cache_path, JSON.stringify(data, null, 2));
-}
-
 async function main(from, to, amount) {
-    const cache = checkCache();
-    if (cache) {
-        console.log(cache);
-        return;
-    }
     try {
         const { browser, page } = await setBrowser();
         const data = await navigateAndScrape(page, from, to, amount);
-        await saveCache(data);
         await browser.close();
         console.log(data);
     } catch (error) {
