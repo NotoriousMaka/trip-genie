@@ -1,95 +1,322 @@
-![](public/logos/logo-transparent-white.png)
+# 🌍 TripGenie - AI-Powered Travel Planner
 
-## Project Overview
-**TripGenie** is an AI-powered web platform designed to generate custom travel itineraries tailored to each user's preferences. By integrating advanced technologies such as ChatGPT 3.5 for personalised recommendations and the Trip.com API for hotel and flight bookings, the platform provides a seamless, intuitive, and highly customisable travel planning experience. The addition of web scraping techniques enhances the platform's functionality, delivering real-time information on weather, currency conversion, and community-generated travel reviews.
+![TripGenie Logo](public/logos/logo-transparent-white.png)
 
-This project is a learning endeavor aimed at extending knowledge in web development, AI integration, and web scraping techniques. It builds on foundational materials from a Computer Science course while introducing new challenges, such as real-time data handling, external API management, and responsive design.
+## 📋 Project Overview
+
+**TripGenie** is an intelligent web application that generates personalized travel itineraries using cutting-edge AI technology. The platform combines ChatGPT 3.5 integration with sophisticated web scraping to deliver comprehensive travel planning experiences, including real-time weather data, currency conversion, and community-sourced travel recommendations.
+
+### 🎯 Key Features
+
+- **AI-Powered Itineraries**: Generate custom travel plans using OpenAI's GPT-3.5
+- **Real-Time Data**: Live weather updates and currency conversion
+- **Web Scraping Integration**: Automatically gather travel information from multiple sources
+- **User Authentication**: Secure user accounts with profile management
+- **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
+- **Multi-Source Data**: Information from Atlas Obscura, Wikivoyage, Lonely Planet, and Yelp
+
+## 🛠 Tech Stack
+
+### Backend
+- **Framework**: Laravel 11.x (PHP 8.2+)
+- **Database**: SQLite (default) / MySQL / PostgreSQL
+- **Authentication**: Laravel Breeze with Jetstream
+- **AI Integration**: OpenAI PHP Client
+
+### Frontend
+- **Styling**: Tailwind CSS, Bootstrap 5.3
+- **JavaScript**: Vue.js 3.x, Alpine.js
+- **Build Tool**: Vite
+
+### Web Scraping
+- **Node.js Tools**: Puppeteer, Playwright
+- **Data Sources**: 
+  - Atlas Obscura (attractions)
+  - Wikivoyage (travel guides)
+  - Lonely Planet (destinations)
+  - Yelp (restaurants)
+  - OpenWeatherMap (weather data)
+
+## 📦 Installation
+
+### Prerequisites
+- PHP 8.2 or higher
+- Node.js 18+ and npm
+- Composer
+- Git
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/tripgenie.git
+cd tripgenie
+```
+
+### 2. Install PHP Dependencies
+```bash
+composer install
+```
+
+### 3. Install Node.js Dependencies
+```bash
+npm install
+```
+
+### 4. Environment Setup
+```bash
+# Copy environment file
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+```
+
+### 5. Configure Environment Variables
+Edit `.env` file and add your API keys:
+
+```env
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Database Configuration
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=tripgenie
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# Application Settings
+APP_NAME="TripGenie"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+```
+
+### 6. Database Setup
+```bash
+# Create database tables
+php artisan migrate
+
+# (Optional) Seed database with sample data
+php artisan db:seed
+```
+
+### 7. Build Assets
+```bash
+# Development build
+npm run dev
+
+# Production build
+npm run build
+```
+
+### 8. Start Development Server
+```bash
+# Start Laravel server
+php artisan serve
+
+# In another terminal, start Vite dev server
+npm run dev
+```
+
+Visit `http://localhost:8000` to access the application.
+
+## 🚀 Usage
+
+### Creating Your First Trip Plan
+
+1. **Register/Login**: Create an account or sign in
+2. **Access Dashboard**: Navigate to your personal dashboard
+3. **Plan a Trip**: 
+   - Enter destination (city and country)
+   - Select travel dates
+   - Choose preferences (adventure, culture, food, etc.)
+4. **Generate Itinerary**: AI creates a detailed day-by-day plan
+5. **View Results**: 
+   - Detailed itinerary with timings
+   - Real-time weather forecast
+   - Currency conversion rates
+   - Local attractions and restaurants
+
+### Features Overview
+
+- **Personalized Itineraries**: AI-generated plans based on your preferences
+- **Weather Integration**: 5-day weather forecasts for your destination
+- **Currency Converter**: Real-time exchange rates
+- **Local Insights**: Curated recommendations from multiple travel sources
+- **Profile Management**: Save and manage your travel plans
+
+## 🔧 Configuration
+
+### API Keys Required
+
+1. **OpenAI API Key**: 
+   - Visit [OpenAI Platform](https://platform.openai.com/)
+   - Generate API key and add to `.env`
+
+2. **Optional APIs**:
+   - OpenWeatherMap (for enhanced weather data)
+   - Google OAuth (for social login)
+
+### Web Scraping Configuration
+
+The application includes several scraping modules in the `/scrapers` directory:
+
+- `scraper.js` - Atlas Obscura attractions
+- `scraper-2.js` - Wikivoyage travel guides  
+- `scraper-3.js` - Lonely Planet destinations
+- `scraper-4-play.js` - Yelp restaurant data
+- `weather-play.js` - Weather information
+- `currency-play.js` - Currency conversion
+
+### Database Configuration
+
+Default: SQLite (no additional setup required)
+
+For MySQL/PostgreSQL:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=tripgenie
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+## 📁 Project Structure
+
+```
+TripGenie/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Auth/          # Authentication controllers
+│   │   ├── TripController.php
+│   │   └── ProfileController.php
+│   └── Models/
+│       ├── User.php
+│       └── Trip.php
+├── resources/
+│   ├── views/
+│   │   ├── auth/          # Authentication views
+│   │   ├── trip/          # Trip planning views
+│   │   └── layouts/       # Layout templates
+│   ├── css/
+│   └── js/
+├── scrapers/              # Web scraping scripts
+│   ├── cache/            # Scraped data cache
+│   ├── cache-play/       # Additional cache
+│   └── *.js             # Scraping modules
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── public/
+│   ├── logos/
+│   └── images/
+└── routes/
+    ├── web.php
+    └── auth.php
+```
+
+## 🧪 Testing
+
+```bash
+# Run PHP tests
+php artisan test
+
+# Run specific test suite
+php artisan test --testsuite=Feature
+
+# Run tests with coverage
+php artisan test --coverage
+```
+
+## 🚀 Deployment
+
+### Production Setup
+
+1. **Server Requirements**:
+   - PHP 8.2+
+   - Web server (Apache/Nginx)
+   - Node.js (for build process)
+   - Database (MySQL/PostgreSQL recommended for production)
+
+2. **Environment Configuration**:
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+```
+
+3. **Build Assets**:
+```bash
+npm run build
+```
+
+4. **Optimize Application**:
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
+```
+
+### Docker Deployment
+
+```dockerfile
+# Example Dockerfile structure
+FROM php:8.2-fpm
+# Add your Docker configuration
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow PSR-12 coding standards for PHP
+- Use ESLint configuration for JavaScript
+- Write tests for new features
+- Update documentation for significant changes
+
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenAI** - For GPT-3.5 integration
+- **Laravel Community** - For the amazing framework
+- **Data Sources**:
+  - Atlas Obscura
+  - Wikivoyage
+  - Lonely Planet
+  - Yelp
+  - OpenWeatherMap
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/tripgenie/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/tripgenie/discussions)
+
+## 🔮 Future Enhancements
+
+- [ ] Mobile app development (React Native/Flutter)
+- [ ] Integration with booking APIs (hotels, flights)
+- [ ] Social features (trip sharing, reviews)
+- [ ] Offline mode capabilities
+- [ ] Multi-language support
+- [ ] Advanced AI chat features
+- [ ] Calendar integration
+- [ ] Expense tracking
+- [ ] Group trip planning
 
 ---
 
-## Technologies Used
-- **Frontend**: Responsive web design for a seamless user experience.
-- **Backend**: Laravel framework for secure and efficient server-side programming.
-- **AI Integration**: ChatGPT 3.5 for personalised itinerary generation.
-- **Web Scraping**: Playwright and Puppeteer (Node.js) to scrape dynamic web content.
-- **External Sources**: OpenWeatherMap.org for weather data and TripAdvisor/Reddit for community reviews.
+**Happy traveling with TripGenie!** 🌍✈️
 
----
-
-## Success Criteria
-The success of **TripGenie** will be measured by:
-1. The quality and accuracy of AI-generated itineraries.
-2. Effective web scraping techniques for real-time weather updates, currency conversion, and community reviews.
-3. A responsive and user-friendly front-end design.
-4. Clean, maintainable, and robust code.
-5. Positive user feedback from colleagues regarding the platform's functionality and customisability.
-
----
-
-## Legal and Ethical Considerations
-- Ensures compliance with web scraping and data privacy laws.
-- Adheres to ethical practices by using reliable sources and providing credit where applicable.
-
----
-
-## Installation and Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/tripgenie.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd tripgenie
-   ```
-3. Install dependencies:
-   ```bash
-   composer install
-   npm install
-   ```
-4. Set up the environment variables:
-   - Create a `.env` file and configure the required API keys (e.g., ChatGPT API, Trip.com API, OpenWeatherMap API).
-5. Run migrations:
-   ```bash
-   php artisan migrate
-   ```
-6. Start the development server:
-   ```bash
-   php artisan serve
-   npm run dev
-   ```
-
----
-
-## Usage
-1. Create an account or log in to access personalised travel planning features.
-2. Input your travel preferences (destination, budget, duration, etc.).
-3. View and customise your AI-generated itinerary.
-4. Check real-time weather updates and currency conversions for your destination.
-5. Save itineraries to your profile for future reference.
-
----
-
-## Future Enhancements
-- Add local transportation suggestions for eco-friendly options.
-- Integrate a booking API for hotels, flights and others.
-- Develop an AI-based travel tips chat feature.
-
----
-
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request to suggest improvements or report bugs.
-
----
-
-## License
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## Acknowledgments
-- [OpenAI](https://openai.com) for ChatGPT 3.5
-- [Node.js](https://nodejs.org) for Playwright and Puppeteer
-
----
-
-Happy traveling with **TripGenie**! 🌍✈️
+*Made with ❤️ for travelers by travelers*

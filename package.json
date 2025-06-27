@@ -23,6 +23,8 @@
     },
     "dependencies": {
         "@heroui/navbar": "^2.2.9",
+        "playwright": "^1.52.0",
+        "puppeteer": "^24.9.0",
         "vite-plugin-sass": "^0.1.0"
     }
 }

@@ -21,3 +21,56 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# TripGenie specific ignores
+/scrapers/cache/*
+!/scrapers/cache/.gitkeep
+/scrapers/cache-play/*
+!/scrapers/cache-play/.gitkeep
+
+# Logs
+*.log
+storage/logs/*.log
+
+# Database
+database/database.sqlite
+*.sqlite
+
+# Environment files
+.env.local
+.env.testing
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# API Keys (if stored in separate files)
+api-keys.json
+keys/
+
+# Node.js specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Editor files
+*.swp
+*.swo
+*~
