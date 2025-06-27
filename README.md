@@ -4,7 +4,7 @@
 
 ## 📋 Project Overview
 
-**TripGenie** is an intelligent web application that generates personalized travel itineraries using cutting-edge AI technology. The platform combines ChatGPT 3.5 integration with sophisticated web scraping to deliver comprehensive travel planning experiences, including real-time weather data, currency conversion, and community-sourced travel recommendations.
+**TripGenie** is an intelligent web application that generates personalised travel itineraries using cutting-edge AI technology. The platform combines ChatGPT 3.5 integration with sophisticated web scraping to deliver comprehensive travel planning experiences, including real-time weather data, currency conversion and community-sourced travel recommendations.
 
 ### 🎯 Key Features
 
@@ -13,7 +13,7 @@
 - **Web Scraping Integration**: Automatically gather travel information from multiple sources
 - **User Authentication**: Secure user accounts with profile management
 - **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
-- **Multi-Source Data**: Information from Atlas Obscura, Wikivoyage, Lonely Planet, and Yelp
+- **Multi-Source Data**: Information from Atlas Obscura, Wikivoyage, Lonely Planet and Yelp
 
 ## 🛠 Tech Stack
 
@@ -140,7 +140,7 @@ Visit `http://localhost:8000` to access the application.
 
 ### Features Overview
 
-- **Personalized Itineraries**: AI-generated plans based on your preferences
+- **Personalised Itineraries**: AI-generated plans based on your preferences
 - **Weather Integration**: 5-day weather forecasts for your destination
 - **Currency Converter**: Real-time exchange rates
 - **Local Insights**: Curated recommendations from multiple travel sources
@@ -252,7 +252,7 @@ APP_URL=https://yourdomain.com
 npm run build
 ```
 
-4. **Optimize Application**:
+4. **Optimise Application**:
 ```bash
 php artisan config:cache
 php artisan route:cache
