@@ -318,4 +318,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 **Happy traveling with TripGenie!** 🌍✈️
 
-*Made with love for travelers by travelers*
+*Made with love for travelers by a traveler!*
