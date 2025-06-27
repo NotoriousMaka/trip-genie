@@ -140,7 +140,7 @@
     </section>
 </main>
 <script>
-    mapboxgl.accessToken = 'pk.eyJ1Ijoibm90b3Jpb3VzbWFrYSIsImEiOiJjbWF5bThkNXcwOTBpMmtxdXF4OTgxaHQwIn0.hf_wgqMowPyesvpIS6XtNA';
+    mapboxgl.accessToken = '';
     const city = @json($city);
     const country = @json($country);
     fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${city},${country}.json?access_token=${mapboxgl.accessToken}`)
