@@ -1,4 +1,4 @@
-# 🌍 TripGenie - AI-Powered Travel Planner
+# TripGenie - AI-Powered Travel Planner
 
 ![TripGenie Logo](public/logos/logo-transparent-white.png)
 
@@ -305,10 +305,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 🔮 Future Enhancements
 
-- [ ] Mobile app development (React Native/Flutter)
 - [ ] Integration with booking APIs (hotels, flights)
 - [ ] Social features (trip sharing, reviews)
-- [ ] Offline mode capabilities
 - [ ] Multi-language support
 - [ ] Advanced AI chat features
 - [ ] Calendar integration
@@ -319,4 +317,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 **Happy traveling with TripGenie!** 🌍✈️
 
-*Made with ❤️ for travelers by travelers*
+*Made with love for travelers by travelers*
