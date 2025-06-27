@@ -47,8 +47,8 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/tripgenie.git
-cd tripgenie
+git clone https://github.com/NotoriousMaka/trip-genie.git
+cd trip-genie
 ```
 
 ### 2. Install PHP Dependencies
