@@ -300,8 +300,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/tripgenie/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/tripgenie/discussions)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/trip-genie/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/trip-genie/discussions)
 
 ## 🔮 Future Enhancements
 
