@@ -20,8 +20,10 @@ async function navigateAndScrape(page, from, to, amount) {
         const box = document.querySelector(".ccOutputBx");
         if (!box) return null;
         const txt = box.querySelector(".ccOutputTxt")?.innerText || "";
-        const rslt = box.querySelector(".ccOutputRslt")?.innerText || "";
-        return { text: txt, result: rslt };
+        const rslt = box.querySelector(".ccOutputRslt")?.cloneNode(true);
+        rslt?.querySelector(".ccOutputCode")?.remove();
+        const rsltText = rslt?.innerText || "";
+        return { text: txt, result: rsltText };
     });
 }
 
@@ -30,7 +32,7 @@ async function main(from, to, amount) {
         const { browser, page } = await setBrowser();
         const data = await navigateAndScrape(page, from, to, amount);
         await browser.close();
-        console.log(data);
+        console.log(JSON.stringify(data));
     } catch (error) {
         console.error("Scraping failed:", error);
     }

@@ -43,7 +43,7 @@ async function main(country, city) {
         const { browser, page } = await setBrowser();
         const data = await navigateAndScrape(page, country, city);
         await browser.close();
-        console.log(data);
+        console.log(JSON.stringify(data));
     } catch (error) {
         console.error("Scraping failed:", error);
     }

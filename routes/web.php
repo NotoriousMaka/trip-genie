@@ -41,5 +41,7 @@ Route::post('/logout', function () {
     return redirect('/');
 })->middleware('auth')->name('logout');
 
+Route::post('/scrape/weather', [TripController::class, 'scrapeWeather'])->name('scrape.weather');
+Route::post('/scrape/currency', [TripController::class, 'scrapeCurrency'])->name('scrape.currency');
 
 require __DIR__.'/auth.php';
